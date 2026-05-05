@@ -1,0 +1,65 @@
+{
+    "siteUrl": "https://hopwinslab.com",
+    "labName": "HopWINS Lab",
+    "labIcon": "./lab_logo.jpg",
+    "nav": [
+        {
+            "label": "Research",
+            "href": "/research",
+            "order": 10
+        },
+        {
+            "label": "Publication",
+            "href": "/publication",
+            "order": 20
+        },
+        {
+            "label": "Team",
+            "href": "/team",
+            "order": 30
+        },
+        {
+            "label": "Course",
+            "href": "/course",
+            "order": 40
+        },
+        {
+            "label": "Join",
+            "href": "/join",
+            "order": 50
+        }
+    ],
+    "pages": {
+        "research": {
+            "title": "Research",
+            "description": "Research description."
+        },
+        "publication": {
+            "title": "Publication",
+            "description": "Publication description."
+        },
+        "team": {
+            "title": "Team",
+            "description": "Team description."
+        },
+        "course": {
+            "title": "Course",
+            "description": "Course description."
+        },
+        "join": {
+            "title": "Join",
+            "description": "Join description."
+        }
+    },
+    "footer": {
+        "contact": {
+            "location": "3400 N Charles St, Malone Hall, Baltimore, MD 21218, USA",
+            "email": "hopwinslab AT gmail DOT com"
+        },
+        "school": {
+            "name": "Department of Computer Science",
+            "logo": "/jhu_logo_wse.svg",
+            "logoAlt": "JHU WSE logo"
+        }
+    }
+}

@@ -1,0 +1,170 @@
+---
+import site from '@/content/config/site.json';
+import '../styles/global.css';
+
+interface Props {
+    title?: string;
+    description?: string;
+    image?: string;
+    basePath?: string;
+    heading?: string;
+    eyebrow?: string;
+    note?: string;
+}
+
+const sortedNav = [...site.nav].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+const { title = site.labName, description = site.labName, image, basePath, heading, eyebrow, note } = Astro.props;
+const pageTitle = title === site.labName ? site.labName : `${title} | ${site.labName}`;
+const canonical = new URL(Astro.url.pathname, site.siteUrl).toString();
+const currentPath = Astro.url.pathname;
+const labIconConfig = site.labIcon as unknown as string | { src: string; alt?: string } | null;
+const labIcon = typeof labIconConfig === 'string' ? { src: labIconConfig, alt: `${site.labName} icon` } : labIconConfig;
+const currentYear = new Date().getFullYear();
+const contactEmailHref = site.footer.contact.email.includes('@') ? `mailto:${site.footer.contact.email}` : null;
+
+function assetPath(src: string) {
+    if (/^(https?:|data:|\/)/.test(src)) {
+        return src;
+    }
+
+    return `/${src.replace(/^\.?\//, '')}`;
+}
+
+function isActive(href: string) {
+    if (href === '/') {
+        return currentPath === '/';
+    }
+
+    return currentPath === href || currentPath.startsWith(`${href}/`);
+}
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {basePath && <base href={basePath} />}
+        <meta name="description" content={description} />
+        <meta name="generator" content={Astro.generator} />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonical} />
+        {image && <meta property="og:image" content={new URL(image, site.siteUrl).toString()} />}
+        <title>{pageTitle}</title>
+    </head>
+    <body class="flex min-h-screen flex-col bg-white">
+        <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+            <div class="page-band flex flex-col gap-3 py-3 lg:flex-row lg:items-center lg:justify-between">
+                <a class="flex min-w-0 items-center gap-3 text-slate-950 no-underline" href="/" aria-label={`${site.labName} home`}>
+                    {
+                        labIcon && (
+                            <img class="h-9 w-9 shrink-0 object-contain" src={assetPath(labIcon.src)} alt={labIcon.alt ?? `${site.labName} icon`} />
+                        )
+                    }
+                    <span class="truncate text-xl font-semibold tracking-normal">{site.labName}</span>
+                </a>
+
+                <nav aria-label="Main navigation">
+                    <ul class="flex flex-wrap gap-1.5">
+                        {
+                            sortedNav.map((item) => (
+                                <li>
+                                    <a
+                                        class:list={[
+                                            'inline-flex min-h-10 items-center rounded-md px-3.5 text-[0.95rem] font-medium no-underline transition',
+                                            isActive(item.href)
+                                                ? 'bg-lab-blue text-white'
+                                                : 'text-slate-700 hover:bg-slate-100 hover:text-lab-blue',
+                                        ]}
+                                        href={item.href}
+                                        aria-current={isActive(item.href) ? 'page' : undefined}
+                                    >
+                                        {item.label}
+                                    </a>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <main id="content" class="flex-1">
+            {
+                heading && (
+                    <section class="border-b border-slate-200 bg-white">
+                        <div class="page-band py-7">
+                            <h1 class="font-serif text-3xl font-semibold tracking-normal text-slate-950 md:text-4xl">{heading}</h1>
+                            {(eyebrow || note) && (
+                                <div class="mt-4 max-w-4xl">
+                                    {eyebrow && <p class="text-sm font-semibold text-lab-blue">{eyebrow}</p>}
+                                    {note && <p class="mt-2 text-sm leading-6 text-slate-600">{note}</p>}
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )
+            }
+            <slot />
+        </main>
+        <footer class="border-t border-slate-200 bg-white">
+            <div class="page-band flex flex-col gap-6 py-6 md:flex-row md:items-end md:justify-between">
+                <section aria-label="Contact" class="text-sm text-slate-600">
+                    <p>{site.footer.contact.location}</p>
+                    {
+                        contactEmailHref ? (
+                            <a class="mt-1 inline-flex font-medium text-lab-blue hover:text-lab-teal" href={contactEmailHref}>
+                                {site.footer.contact.email}
+                            </a>
+                        ) : (
+                            <p class="mt-1 font-medium text-lab-blue">{site.footer.contact.email}</p>
+                        )
+                    }
+                    <p class="mt-4 text-xs text-slate-500">© {currentYear} {site.labName}. All rights reserved.</p>
+                </section>
+
+                <div class="flex flex-col gap-3 md:items-end">
+                    <section class="flex items-center gap-4 text-left text-sm font-medium text-slate-700 md:text-right" aria-label="School">
+                        {
+                            site.footer.school.logo && (
+                                <img class="h-14 w-auto max-w-72 object-contain" src={site.footer.school.logo} alt={site.footer.school.logoAlt} loading="lazy" />
+                            )
+                        }
+                        <span class="h-10 border-l border-slate-300" aria-hidden="true"></span>
+                        <span>{site.footer.school.name}</span>
+                    </section>
+                </div>
+            </div>
+        </footer>
+        <script>
+            const carousels = document.querySelectorAll('[data-carousel]');
+
+            for (const carousel of carousels) {
+                const slides = Array.from(carousel.querySelectorAll('[data-slide]'));
+                const prev = carousel.querySelector('[data-carousel-prev]');
+                const next = carousel.querySelector('[data-carousel-next]');
+                let active = 0;
+
+                const showSlide = (target: number) => {
+                    if (slides.length === 0) return;
+                    slides[active].classList.remove('opacity-100');
+                    slides[active].classList.add('opacity-0');
+                    active = (target + slides.length) % slides.length;
+                    slides[active].classList.remove('opacity-0');
+                    slides[active].classList.add('opacity-100');
+                };
+
+                prev?.addEventListener('click', () => showSlide(active - 1));
+                next?.addEventListener('click', () => showSlide(active + 1));
+
+                if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && slides.length > 1) {
+                    window.setInterval(() => showSlide(active + 1), 7000);
+                }
+            }
+        </script>
+    </body>
+</html>

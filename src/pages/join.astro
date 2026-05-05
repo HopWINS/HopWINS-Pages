@@ -1,0 +1,32 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@/layout/BaseLayout.astro';
+import site from '@/content/config/site.json';
+import { byOrderThenTitle } from '@/lib/content';
+
+const joinItems = (await getCollection('join', ({ data }) => !data.draft)).sort(byOrderThenTitle);
+const rows = await Promise.all(
+    joinItems.map(async (item) => ({
+        item,
+        Content: (await render(item)).Content,
+    })),
+);
+const page = site.pages.join;
+---
+
+<BaseLayout title={page.title} description={page.description} heading={page.title}>
+    <section class="page-band grid gap-5 py-10">
+        {
+            rows.map(({ item, Content }) => (
+                <article class="row-card grid gap-5 p-6 md:grid-cols-[minmax(180px,0.34fr)_1fr]">
+                    <div>
+                        <h2 class="font-serif text-2xl font-semibold tracking-normal text-slate-950">{item.data.title}</h2>
+                    </div>
+                    <div class="prose-lab text-sm">
+                        <Content />
+                    </div>
+                </article>
+            ))
+        }
+    </section>
+</BaseLayout>

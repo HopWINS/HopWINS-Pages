@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://hopwinslab.com/sitemap-index.xml

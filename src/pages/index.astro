@@ -1,0 +1,141 @@
+---
+import { getEntry } from 'astro:content';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import BaseLayout from '@/layout/BaseLayout.astro';
+import site from '@/content/config/site.json';
+
+const home = await getEntry('index', 'index');
+const newsEntry = await getEntry('news', 'index');
+const title = home?.data.title ?? site.labName;
+const description = home?.data.description ?? site.labName;
+const slides = home?.data.heroImages ?? [];
+const collapsedNewsCount = home?.data.newsLimit ?? 6;
+const markdownProcessor = await createMarkdownProcessor();
+const news = await Promise.all(
+    (newsEntry?.data.items ?? [])
+        .sort((a, b) => b.date.getTime() - a.date.getTime())
+        .map(async (item) => ({
+            ...item,
+            html: (await markdownProcessor.render(item.text)).code,
+        })),
+);
+const newsDateFormatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+});
+---
+
+<BaseLayout title={title} description={description} image={slides[0]?.src}>
+    <section class="bg-white">
+        <div class="page-band grid gap-8 py-8 lg:grid-cols-3 lg:items-stretch lg:py-12">
+            <div class="flex flex-col justify-center border-l-[6px] border-lab-blue pl-5 lg:col-span-1">
+                <h1 class="font-serif text-4xl font-semibold leading-tight tracking-normal text-slate-950 md:text-5xl">
+                    {title}
+                </h1>
+                <p class="mt-5 text-lg leading-8 text-slate-600">{description}</p>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100 shadow-sm" data-carousel>
+                    <div class="relative aspect-[16/9]">
+                        {
+                            slides.map((slide, index) => (
+                                <figure
+                                    class:list={[
+                                        'absolute inset-0 transition-opacity duration-500',
+                                        index === 0 ? 'opacity-100' : 'opacity-0',
+                                    ]}
+                                    data-slide
+                                >
+                                    <img
+                                        class="h-full w-full object-cover"
+                                        src={slide.src}
+                                        alt={slide.alt}
+                                        loading={index === 0 ? 'eager' : 'lazy'}
+                                    />
+                                    {slide.caption && <figcaption class="absolute bottom-0 left-0 right-0 bg-slate-950/55 px-4 py-2 text-sm text-white">{slide.caption}</figcaption>}
+                                </figure>
+                            ))
+                        }
+                    </div>
+
+                    {
+                        slides.length > 1 && (
+                            <>
+                                <button
+                                    class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md bg-white/45 text-sm font-semibold text-slate-900/70 backdrop-blur transition hover:bg-white/75"
+                                    type="button"
+                                    data-carousel-prev
+                                    aria-label="Previous image"
+                                >
+                                    &lt;
+                                </button>
+                                <button
+                                    class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md bg-white/45 text-sm font-semibold text-slate-900/70 backdrop-blur transition hover:bg-white/75"
+                                    type="button"
+                                    data-carousel-next
+                                    aria-label="Next image"
+                                >
+                                    &gt;
+                                </button>
+                            </>
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="page-band py-10" aria-labelledby="news-heading">
+        <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h2 id="news-heading" class="font-serif text-3xl font-semibold tracking-normal text-slate-950">News</h2>
+            </div>
+        </div>
+
+        <ol class="border-t border-slate-200">
+            {
+                news.map((item, index) => (
+                    <li
+                        class:list={[
+                            'grid gap-2 py-3 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-5',
+                            index > 0 && 'border-t border-slate-200',
+                            index >= collapsedNewsCount && 'hidden',
+                        ]}
+                        data-news-item={index >= collapsedNewsCount ? 'extra' : undefined}
+                    >
+                        <time class="text-sm font-semibold text-lab-blue" datetime={item.date.toISOString()}>
+                            {newsDateFormatter.format(item.date)}
+                        </time>
+                        <div class="news-line text-sm leading-6 text-slate-700" set:html={item.html} />
+                    </li>
+                ))
+            }
+        </ol>
+        {
+            news.length > collapsedNewsCount && (
+                <button class="mt-4 rounded-md border border-slate-200 px-3.5 py-2 text-sm font-medium text-lab-blue transition hover:border-lab-blue hover:bg-lab-sky" type="button" data-news-more aria-expanded="false">
+                    Show more
+                </button>
+            )
+        }
+    </section>
+
+    <script>
+        const newsMore = document.querySelector('[data-news-more]');
+        const extraNews = document.querySelectorAll('[data-news-item="extra"]');
+
+        newsMore?.addEventListener('click', () => {
+            const expanded = newsMore.getAttribute('aria-expanded') === 'true';
+
+            for (const item of extraNews) {
+                item.classList.toggle('hidden', expanded);
+            }
+
+            newsMore.setAttribute('aria-expanded', String(!expanded));
+            newsMore.textContent = expanded ? 'Show more' : 'Show less';
+        });
+    </script>
+</BaseLayout>

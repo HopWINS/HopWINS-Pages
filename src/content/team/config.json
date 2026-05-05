@@ -1,0 +1,24 @@
+{
+    "categories": [
+        {
+            "id": "pi",
+            "label": "Principal Investigator",
+            "order": 10
+        },
+        {
+            "id": "phd",
+            "label": "PhD Student",
+            "order": 20
+        },
+        {
+            "id": "master",
+            "label": "Master Student",
+            "order": 30
+        },
+        {
+            "id": "alumni",
+            "label": "Alumni",
+            "order": 90
+        }
+    ]
+}

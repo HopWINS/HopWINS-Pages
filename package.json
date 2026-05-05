@@ -1,0 +1,23 @@
+{
+    "name": "hopwins-pages",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "check": "astro check"
+    },
+    "engines": {
+        "node": ">=18.18.0"
+    },
+    "dependencies": {
+        "@astrojs/sitemap": "^3.7.2",
+        "astro": "^6.1.7"
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.2",
+        "@tailwindcss/vite": "^4.2.4",
+        "tailwindcss": "^4.2.4"
+    }
+}

@@ -1,0 +1,113 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layout/BaseLayout.astro';
+import site from '@/content/config/site.json';
+import teamConfig from '@/content/team/config.json';
+import { byOrderThenTitle, stripOrderPrefix, entrySlug } from '@/lib/content';
+import type { CollectionEntry } from 'astro:content';
+
+interface TeamRow {
+    member: CollectionEntry<'team'>;
+}
+
+interface TeamGroup {
+    id: string;
+    label: string;
+    order: number;
+    rows: TeamRow[];
+}
+
+const members = (await getCollection('team', ({ data }) => !data.draft)).sort(byOrderThenTitle);
+const memberRows = members.map((member) => ({ member }));
+
+function titleCase(value: string) {
+    return value.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function initials(name: string) {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase();
+}
+
+function categoryFromPath(member: CollectionEntry<'team'>) {
+    return stripOrderPrefix(entrySlug(member).split('/')[0] ?? 'other');
+}
+
+const categoryConfig = new Map(teamConfig.categories.map((category) => [category.id, category]));
+
+const grouped = new Map<string, TeamGroup>();
+for (const row of memberRows) {
+    const categoryId = categoryFromPath(row.member);
+    const config = categoryConfig.get(categoryId);
+    const group = grouped.get(categoryId) ?? {
+        id: categoryId,
+        label: config?.label ?? titleCase(categoryId),
+        order: config?.order ?? 999,
+        rows: [],
+    };
+
+    group.rows.push(row);
+    grouped.set(categoryId, group);
+}
+
+const groups = [...grouped.values()].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+const page = site.pages.team;
+
+function emailHref(email: string) {
+    return email.includes('@') ? `mailto:${email}` : null;
+}
+---
+
+<BaseLayout title={page.title} description={page.description} heading={page.title}>
+    <section class="page-band grid gap-10 py-10">
+        {
+            groups.map((group) => (
+                <section aria-labelledby={`team-${group.id}`}>
+                    <h2 id={`team-${group.id}`} class="mb-4 font-serif text-3xl font-semibold tracking-normal text-slate-950">{group.label}</h2>
+                    <div class="grid gap-3">
+                        {group.rows.map(({ member }) => (
+                            <article class="row-card grid gap-4 border-l-4 border-l-lab-blue p-4 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center md:grid-cols-[8rem_minmax(0,1fr)]">
+                                <div class="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md bg-lab-sky text-xl font-semibold text-lab-blue md:h-32 md:w-32">
+                                    {member.data.photo ? (
+                                        <img class="h-full w-full object-cover" src={member.data.photo.src} alt={member.data.photo.alt} loading="lazy" />
+                                    ) : (
+                                        initials(member.data.name)
+                                    )}
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="text-lg font-semibold text-slate-950">
+                                        {member.data.homepage ? (
+                                            <a class="text-slate-950 no-underline hover:text-lab-blue" href={member.data.homepage}>
+                                                {member.data.name}
+                                            </a>
+                                        ) : (
+                                            member.data.name
+                                        )}
+                                    </h3>
+                                    <p class="mt-1 text-sm font-medium text-slate-600">{member.data.role}</p>
+                                    {member.data.alumniCurrent && <p class="mt-1 text-sm text-slate-500">{member.data.alumniCurrent}</p>}
+                                    {
+                                        member.data.email && (
+                                            emailHref(member.data.email) ? (
+                                                <a class="mt-2 inline-flex text-sm font-medium text-lab-blue no-underline hover:text-lab-blue-dark hover:underline" href={emailHref(member.data.email)}>
+                                                    {member.data.email}
+                                                </a>
+                                            ) : (
+                                                <p class="mt-2 text-sm font-medium text-lab-blue">{member.data.email}</p>
+                                            )
+                                        )
+                                    }
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            ))
+        }
+    </section>
+</BaseLayout>

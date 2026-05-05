@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layout/BaseLayout.astro';
+import site from '@/content/config/site.json';
+import { byOrderThenTitle, entrySlug } from '@/lib/content';
+
+const researchEntries = (await getCollection('research', ({ data }) => !data.draft)).sort(byOrderThenTitle);
+const page = site.pages.research;
+---
+
+<BaseLayout title={page.title} description={page.description} heading={page.title}>
+    <section class="page-band py-10">
+        <div class="grid gap-5">
+            {
+                researchEntries.map((entry) => (
+                    <article class="row-card grid overflow-hidden md:grid-cols-[minmax(220px,0.38fr)_1fr]">
+                        <a class="block bg-slate-100 no-underline" href={`/research/${entrySlug(entry)}`} aria-label={`Open ${entry.data.title}`}>
+                            <img class="h-full min-h-56 w-full object-cover transition duration-200 hover:scale-[1.02]" src={entry.data.image.src} alt={entry.data.image.alt} loading="lazy" />
+                        </a>
+                        <div class="p-6">
+                            <h2 class="font-serif text-2xl font-semibold tracking-normal text-slate-950">
+                                <a class="text-slate-950 no-underline hover:text-lab-blue" href={`/research/${entrySlug(entry)}`}>
+                                    {entry.data.title}
+                                </a>
+                            </h2>
+                            <p class="mt-3 max-w-3xl leading-7 text-slate-600">{entry.data.summary}</p>
+                        </div>
+                    </article>
+                ))
+            }
+        </div>
+    </section>
+</BaseLayout>

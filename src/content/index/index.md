@@ -1,7 +1,7 @@
 ---
 title: "HopWINS Lab"
-description: ""
-newsLimit: 5
+description: "Our research focus on next-generation wireless network architectures, novel radio hardware & software design, and ubiquitous communication & sensing systems."
+newsLimit: 10
 heroImages:
     - src: "jhu_view_1.jpg"
       alt: "Johns Hopkins University campus east gate"

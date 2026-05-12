@@ -1,6 +1,7 @@
 ---
 title: "Intern"
 members:
-    Undergrad Student:
-        - name: "John Doe"
+    Master Student: []
+    Undergrad Student: []
+    Visiting: []
 ---

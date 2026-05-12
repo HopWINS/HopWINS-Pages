@@ -34,24 +34,23 @@ const news = await Promise.all(
 const newsDateFormatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
     timeZone: 'UTC',
 });
 ---
 
 <BaseLayout title={title} description={metaDescription} image={firstSlideUrl}>
     <section class="bg-white">
-        <div class="page-band grid gap-8 py-8 lg:grid-cols-3 lg:items-stretch lg:py-12">
-            <div class="flex flex-col justify-center border-l-[6px] border-lab-blue pl-5 lg:col-span-1">
+        <div class="page-band grid gap-8 py-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.7fr)] lg:items-center lg:py-12">
+            <div class="flex flex-col justify-center border-l-[6px] border-lab-blue py-5 pl-5 md:py-6">
                 <h1 class="font-serif text-4xl font-semibold leading-tight tracking-normal text-slate-950 md:text-5xl">
                     {title}
                 </h1>
                 {description && <p class="mt-5 text-lg leading-8 text-slate-600">{description}</p>}
             </div>
 
-            <div class="lg:col-span-2">
+            <div class="mx-auto w-full max-w-3xl">
                 <div class="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100 shadow-sm" data-carousel>
-                    <div class="relative aspect-[16/9]">
+                    <div class="relative h-[clamp(220px,24vw,320px)]">
                         {
                             slides.map((slide, index) => (
                                 <figure
@@ -62,7 +61,7 @@ const newsDateFormatter = new Intl.DateTimeFormat('en-US', {
                                     data-slide
                                 >
                                     <Image
-                                        class="h-full w-full object-cover"
+                                        class="h-full w-full object-cover object-center"
                                         src={slide.src}
                                         alt={slide.alt}
                                         loading={index === 0 ? 'eager' : 'lazy'}

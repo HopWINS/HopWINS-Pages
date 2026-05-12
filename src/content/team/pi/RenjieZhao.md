@@ -1,10 +1,10 @@
 ---
-name: 'Renjie Zhao'
-role: 'Assistant Professor'
+name: "Renjie Zhao"
+role: "Assistant Professor"
 order: 10
-homepage: 'https://renjiezhao.github.io'
-email: 'rjzhao AT jhu DOT edu'
+homepage: "https://renjiezhao.github.io"
+email: "rjzhao@jhu.edu"
 photo:
-    src: '/lab_people_RenjieZhao.jpg'
-    alt: 'Jane Doe'
+    src: "RenjieZhao.jpg"
+    alt: "Renjie Zhao"
 ---

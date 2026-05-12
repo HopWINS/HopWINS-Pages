@@ -1,50 +1,74 @@
 ---
-import { getCollection } from 'astro:content';
+import { getEntry } from 'astro:content';
 import BaseLayout from '@/layout/BaseLayout.astro';
-import site from '@/content/config/site.json';
-import courseConfig from '@/content/course/config.json';
-import { isFolderIndex, orderedFolderRoute } from '@/lib/content';
 
-const courseOrder = new Map(courseConfig.order.map((slug, index) => [slug, index]));
-const courses = (await getCollection('course', ({ data }) => !data.draft))
-    .filter(isFolderIndex)
-    .sort((a, b) => {
-        const orderDiff = (courseOrder.get(orderedFolderRoute(a)) ?? 999) - (courseOrder.get(orderedFolderRoute(b)) ?? 999);
-        if (orderDiff !== 0) {
-            return orderDiff;
-        }
+const coursePage = await getEntry('course', 'index');
 
-        return (a.data.title ?? a.data.shortName ?? '').localeCompare(b.data.title ?? b.data.shortName ?? '');
-    });
-const page = site.pages.course;
+if (!coursePage) {
+    throw new Error('Missing src/content/course/index.md');
+}
+
+const courses = coursePage.data.courses;
+const teaching = coursePage.data.teaching;
+const coursesById = new Map(courses.map((course) => [course.id, course]));
+const pageTitle = coursePage.data.title;
 ---
 
-<BaseLayout title={page.title} description={page.description} heading={page.title}>
+<BaseLayout title={pageTitle} description={pageTitle} heading={pageTitle}>
     <section class="page-band py-10">
         <div class="grid gap-5">
             {
                 courses.map((course) => {
-                    const href = `/course/${orderedFolderRoute(course)}/`;
+                    const href = `/course/${course.id}/`;
 
                     return (
                         <article class="row-card border-l-4 border-l-lab-blue p-5">
                             <div>
-                                {(course.data.code || course.data.semester) && (
+                                {(course.code || course.semester) && (
                                     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-lab-blue">
-                                        {course.data.code && <span>{course.data.code}</span>}
-                                        {course.data.code && course.data.semester && <span class="h-4 border-l border-slate-300" aria-hidden="true"></span>}
-                                        {course.data.semester && <span>{course.data.semester}</span>}
+                                        {course.code && <span>{course.code}</span>}
+                                        {course.code && course.semester && <span class="h-4 border-l border-slate-300" aria-hidden="true"></span>}
+                                        {course.semester && <span>{course.semester}</span>}
                                     </div>
                                 )}
-                                <h2 class="mt-2 font-serif text-2xl font-semibold tracking-normal text-slate-950">
-                                    <a class="text-slate-950 no-underline hover:text-lab-blue" href={href}>{course.data.title ?? course.data.shortName}</a>
+                                <h2 class="mt-2 font-serif text-xl font-semibold tracking-normal text-slate-950 md:text-[1.35rem]">
+                                    <a class="text-slate-950 no-underline hover:text-lab-blue" href={href}>{course.title}</a>
                                 </h2>
-                                {course.data.note && <p class="mt-3 text-pretty leading-7 text-slate-600">{course.data.note}</p>}
+                                {course.description && <p class="mt-3 text-pretty leading-7 text-slate-600">{course.description}</p>}
                             </div>
                         </article>
                     );
                 })
             }
         </div>
+
+        {
+            teaching.length > 0 && (
+                <section class="mt-12 border-t border-slate-200 pt-8" aria-labelledby="teaching">
+                    <h2 id="teaching" class="mb-4 font-serif text-2xl font-semibold tracking-normal text-slate-950">Teaching</h2>
+                    <div>
+                        <ul class="border-t border-slate-200">
+                            {teaching.map((offering, index) => {
+                                const course = coursesById.get(offering.id);
+
+                                return (
+                                    <li class:list={['grid gap-2 py-3 text-sm sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-5', index > 0 && 'border-t border-slate-200']}>
+                                        <span class="font-semibold text-lab-blue">{offering.semester}</span>
+                                        {course ? (
+                                            <span class="font-medium text-slate-900">
+                                                {course.shortName ?? course.title}
+                                                {course.code && <span class="ml-2 text-slate-500">{course.code}</span>}
+                                            </span>
+                                        ) : (
+                                            <span class="text-slate-600">{offering.id}</span>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                </section>
+            )
+        }
     </section>
 </BaseLayout>

@@ -1,34 +1,73 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '@/layout/BaseLayout.astro';
 import PublicationItem from '@/layout/PublicationItem.astro';
-import { byNewestDate, entrySlug } from '@/lib/content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 
 export async function getStaticPaths() {
-    const researchEntries = await getCollection('research', ({ data }) => !data.draft);
+    const researchPage = await getEntry('research', 'index');
+    const areas = researchPage?.data.areas.filter((area) => !area.draft) ?? [];
+    const paths = [];
 
-    return researchEntries.map((entry) => ({
-        params: { slug: entrySlug(entry) },
-        props: { entry },
-    }));
+    for (const area of areas) {
+        const entry = await getEntry('research', `${area.id}/index`);
+
+        if (entry && !entry.data.draft) {
+            paths.push({
+                params: { slug: area.id },
+                props: { entry, area },
+            });
+        }
+    }
+
+    return paths;
 }
 
-const { entry } = Astro.props;
-const slug = entrySlug(entry);
+const { entry, area } = Astro.props;
 const { Content } = await render(entry);
-const gallery = entry.data.gallery.length > 0 ? entry.data.gallery : [entry.data.image];
-const publicationIds = new Set(entry.data.publicationIds);
-const publications = (await getCollection('publication', ({ data }) => !data.draft))
-    .filter((publication) => publicationIds.has(entrySlug(publication)) || publication.data.research.includes(slug))
-    .sort(byNewestDate);
+const images = area.image;
+const researchPage = await getEntry('research', 'index');
+const publicationPage = await getEntry('publication', 'index');
+const researchLinks = Object.fromEntries((researchPage?.data.areas ?? []).map((researchArea) => [researchArea.id, { label: researchArea.name, href: `/research/${researchArea.id}/` }]));
+const publications = (publicationPage?.data.publication ?? [])
+    .filter((paper) => {
+        return !paper.draft && paper.research.includes(area.id);
+    })
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
+const researchAssets = import.meta.glob<ImageMetadata>('/src/content/research/*/assets/*.{jpg,jpeg,png,webp,svg}', {
+    import: 'default',
+    eager: true,
+});
+type ResolvedResearchImage = Omit<(typeof images)[number], 'src'> & { src: ImageMetadata };
+
+function resolveResearchImage(src: string) {
+    if (/^(https?:|\/)/.test(src)) {
+        return undefined;
+    }
+
+    const normalized = src.replace(/^\.?\//, '');
+    const assetPath = /^(assets\/|\.\.\/)/.test(normalized) ? normalized : `assets/${normalized}`;
+    return researchAssets[`/src/content/research/${area.id}/${assetPath}`];
+}
+
+const resolvedImages = images
+    .map((image): ResolvedResearchImage | null => {
+        const src = resolveResearchImage(image.src);
+
+        return src ? { ...image, src } : null;
+    })
+    .filter((image): image is ResolvedResearchImage => Boolean(image));
+const cover = resolvedImages[0];
+const coverMetaUrl = cover?.src.src;
 ---
 
-<BaseLayout title={entry.data.title} description={entry.data.summary} image={entry.data.image.src} heading={entry.data.title}>
+<BaseLayout title={entry.data.title} description={area.description} image={coverMetaUrl} heading={entry.data.title}>
     <section class="page-band grid gap-8 py-10 lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.1fr)] lg:items-start">
         <div class="relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:sticky lg:top-28" data-carousel>
             <div class="relative aspect-[4/3]">
                 {
-                    gallery.map((image, index) => (
+                    resolvedImages.map((image, index) => (
                         <figure
                             class:list={[
                                 'absolute inset-0 transition-opacity duration-500',
@@ -36,7 +75,7 @@ const publications = (await getCollection('publication', ({ data }) => !data.dra
                             ]}
                             data-slide
                         >
-                            <img class="h-full w-full object-cover" src={image.src} alt={image.alt} loading={index === 0 ? 'eager' : 'lazy'} />
+                            <Image class="h-full w-full object-cover" src={image.src} alt={image.alt} loading={index === 0 ? 'eager' : 'lazy'} />
                             {image.caption && <figcaption class="absolute bottom-0 left-0 right-0 bg-slate-950/55 px-4 py-2 text-sm text-white">{image.caption}</figcaption>}
                         </figure>
                     ))
@@ -44,40 +83,44 @@ const publications = (await getCollection('publication', ({ data }) => !data.dra
             </div>
 
             {
-                gallery.length > 1 && (
+                resolvedImages.length > 1 && (
                     <>
                         <button
-                            class="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md bg-white/45 text-sm font-semibold text-slate-900/70 backdrop-blur transition hover:bg-white/75"
+                            class="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/20 text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-slate-950/35 hover:ring-white/60"
                             type="button"
                             data-carousel-prev
                             aria-label="Previous image"
                         >
-                            &lt;
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M15 18L9 12L15 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
                         </button>
                         <button
-                            class="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md bg-white/45 text-sm font-semibold text-slate-900/70 backdrop-blur transition hover:bg-white/75"
+                            class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-slate-950/20 text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-slate-950/35 hover:ring-white/60"
                             type="button"
                             data-carousel-next
                             aria-label="Next image"
                         >
-                            &gt;
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M9 18L15 12L9 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
                         </button>
                     </>
                 )
             }
         </div>
 
-        <article class="prose-lab">
+        <article class="prose-lab markdown-page markdown-inline">
             <Content />
         </article>
     </section>
 
     <section class="page-band pb-12" aria-labelledby="related-publications">
-        <h2 id="related-publications" class="mb-4 font-serif text-3xl font-semibold tracking-normal text-slate-950">Related Papers</h2>
+        <h2 id="related-publications" class="mb-4 font-serif text-3xl font-semibold tracking-normal text-slate-950">Related Publications</h2>
         {
             publications.length > 0 ? (
                 <div class="grid gap-4">
-                    {publications.map((publication) => <PublicationItem publication={publication} />)}
+                    {publications.map((paper) => <PublicationItem paper={paper} researchLinks={researchLinks} />)}
                 </div>
             ) : (
                 <p class="rounded-lg border border-slate-200 bg-white p-5 text-slate-600">Related publications will appear here when publication Markdown files reference this research area.</p>

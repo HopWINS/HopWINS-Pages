@@ -1,0 +1,35 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@/layout/BaseLayout.astro';
+
+export async function getStaticPaths() {
+    const publicationPage = await getEntry('publication', 'index');
+    const projectPapers = publicationPage?.data.publication.filter((paper) => !paper.draft && paper.project) ?? [];
+    const paths = await Promise.all(projectPapers.map(async (paper) => {
+        const entry = await getEntry('publication', `${paper.id}/index`);
+
+        if (!entry || entry.data.draft) {
+            return null;
+        }
+
+        return {
+            params: { slug: paper.id },
+            props: { entry, paper },
+        };
+    }));
+
+    return paths.filter((path): path is NonNullable<(typeof paths)[number]> => path !== null);
+}
+
+const { entry, paper } = Astro.props;
+const { Content } = await render(entry);
+const title = entry.data.title;
+---
+
+<BaseLayout title={title} description={paper.title} basePath={`/project/${paper.id}/`} heading={title}>
+    <section class="page-band py-10">
+        <article class="prose-lab markdown-page">
+            <Content />
+        </article>
+    </section>
+</BaseLayout>

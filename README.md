@@ -15,26 +15,63 @@ HopWINS-Pages/
 ├─ public/
 ├─ src/
 │  ├─ content/
-│  │  ├─ config/site.json
 │  │  ├─ course/
-│  │  ├─ index/index.md
+│  │  │  ├─ [...course]/
+│  │  │  │  ├─ assets/
+│  │  │  │  ├─ index.md
+│  │  │  │  └─ [...course-page].md
+│  │  │  └─ index.md
+│  │  ├─ index/
+│  │  │  ├─ assets/
+│  │  │  └─ index.md
 │  │  ├─ join/
-│  │  ├─ news/index.md
+│  │  │  └─ index.md
+│  │  ├─ news/
+│  │  │  └─ index.md
 │  │  ├─ publication/
+│  │  │  ├─ [...publication]/
+│  │  │  │  ├─ assets/
+│  │  │  │  └─ index.md
+│  │  │  └─ index.md
 │  │  ├─ research/
+│  │  │  ├─ [...research]/
+│  │  │  │  ├─ assets/
+│  │  │  │  └─ index.md
+│  │  │  └─ index.md
+│  │  ├─ site/
+│  │  │  ├─ assets/
+│  │  │  └─ index.md
 │  │  └─ team/
+│  │  │  ├─ alumni/
+│  │  │  |  └─ index.md
+│  │  │  ├─ intern/
+│  │  │  |  └─ index.md
+│  │  │  ├─ phd/
+│  │  │  │  ├─ assets/
+│  │  │  |  ├─ index.md
+│  │  │  |  └─ [...phd].md
+│  │  │  ├─ pi/
+│  │  │  │  ├─ assets/
+│  │  │  │  ├─ index.md
+│  │  │  |  └─ [...pi].md
+│  │  │  └─ index.md
 │  ├─ layout/
 │  │  ├─ BaseLayout.astro
 │  │  └─ PublicationItem.astro
-│  ├─ lib/content.ts
+│  ├─ lib/
+│  │  ├─ asset-routes.ts
+│  │  └─ content.ts
 │  ├─ pages/
 │  │  ├─ course/
+│  │  ├─ project/
+│  │  ├─ publication/
 │  │  ├─ research/
 │  │  ├─ index.astro
 │  │  ├─ join.astro
 │  │  ├─ publication.astro
 │  │  └─ team.astro
-│  ├─ styles/global.css
+│  ├─ styles
+│  │  └─ global.css
 │  └─ content.config.ts
 ├─ astro.config.mjs
 ├─ package-lock.json

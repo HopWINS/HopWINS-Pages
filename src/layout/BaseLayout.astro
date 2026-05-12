@@ -1,5 +1,5 @@
 ---
-import site from '@/content/config/site.json';
+import { getEntry } from 'astro:content';
 import '../styles/global.css';
 
 interface Props {
@@ -9,25 +9,43 @@ interface Props {
     basePath?: string;
     heading?: string;
     eyebrow?: string;
-    note?: string;
 }
 
-const sortedNav = [...site.nav].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
-const { title = site.labName, description = site.labName, image, basePath, heading, eyebrow, note } = Astro.props;
+const siteEntry = await getEntry('site', 'index');
+
+if (!siteEntry) {
+    throw new Error('Missing src/content/site/index.md');
+}
+
+const site = siteEntry.data;
+const sortedNav = site.nav.map((item) => ({
+    ...item,
+    href: item.id === 'home' ? '/' : `/${item.id}`,
+}));
+const { title = site.labName, description = site.labName, image, basePath, heading, eyebrow } = Astro.props;
 const pageTitle = title === site.labName ? site.labName : `${title} | ${site.labName}`;
 const canonical = new URL(Astro.url.pathname, site.siteUrl).toString();
 const currentPath = Astro.url.pathname;
-const labIconConfig = site.labIcon as unknown as string | { src: string; alt?: string } | null;
-const labIcon = typeof labIconConfig === 'string' ? { src: labIconConfig, alt: `${site.labName} icon` } : labIconConfig;
+const labIcon = typeof site.labIcon === 'string' ? site.labIcon : site.labIcon?.src;
 const currentYear = new Date().getFullYear();
 const contactEmailHref = site.footer.contact.email.includes('@') ? `mailto:${site.footer.contact.email}` : null;
+const configAssets = import.meta.glob<string>('/src/content/site/assets/*.{jpg,jpeg,png,webp,svg}', {
+    query: '?url',
+    import: 'default',
+    eager: true,
+});
 
-function assetPath(src: string) {
+function assetPath(src: string | undefined) {
+    if (!src) {
+        return undefined;
+    }
+
     if (/^(https?:|data:|\/)/.test(src)) {
         return src;
     }
 
-    return `/${src.replace(/^\.?\//, '')}`;
+    const normalized = src.replace(/^\.?\//, '');
+    return configAssets[`/src/content/site/assets/${normalized}`] ?? src;
 }
 
 function isActive(href: string) {
@@ -47,7 +65,6 @@ function isActive(href: string) {
         {basePath && <base href={basePath} />}
         <meta name="description" content={description} />
         <meta name="generator" content={Astro.generator} />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="canonical" href={canonical} />
         <meta property="og:title" content={pageTitle} />
@@ -63,7 +80,7 @@ function isActive(href: string) {
                 <a class="flex min-w-0 items-center gap-3 text-slate-950 no-underline" href="/" aria-label={`${site.labName} home`}>
                     {
                         labIcon && (
-                            <img class="h-9 w-9 shrink-0 object-contain" src={assetPath(labIcon.src)} alt={labIcon.alt ?? `${site.labName} icon`} />
+                            <img class="h-9 w-9 shrink-0 object-contain" src={assetPath(labIcon)} alt="" />
                         )
                     }
                     <span class="truncate text-xl font-semibold tracking-normal">{site.labName}</span>
@@ -97,12 +114,11 @@ function isActive(href: string) {
             {
                 heading && (
                     <section class="border-b border-slate-200 bg-white">
-                        <div class="page-band py-7">
-                            <h1 class="font-serif text-3xl font-semibold tracking-normal text-slate-950 md:text-4xl">{heading}</h1>
-                            {(eyebrow || note) && (
+                        <div class="page-band py-6">
+                            <h1 class="font-serif text-2xl font-semibold tracking-normal text-slate-950 md:text-3xl">{heading}</h1>
+                            {eyebrow && (
                                 <div class="mt-4 max-w-4xl">
-                                    {eyebrow && <p class="text-sm font-semibold text-lab-blue">{eyebrow}</p>}
-                                    {note && <p class="mt-2 text-sm leading-6 text-slate-600">{note}</p>}
+                                    <p class="text-sm font-semibold text-lab-blue">{eyebrow}</p>
                                 </div>
                             )}
                         </div>
@@ -112,31 +128,38 @@ function isActive(href: string) {
             <slot />
         </main>
         <footer class="border-t border-slate-200 bg-white">
-            <div class="page-band flex flex-col gap-6 py-6 md:flex-row md:items-end md:justify-between">
-                <section aria-label="Contact" class="text-sm text-slate-600">
-                    <p>{site.footer.contact.location}</p>
+            <div class="page-band flex flex-col gap-4 py-3 md:flex-row md:items-center md:justify-between">
+                <section aria-label="Contact" class="space-y-1.5 text-sm font-medium text-slate-600">
+                    <p class="flex items-start gap-2">
+                        <img class="mt-0.5 h-4 w-4 shrink-0" src={assetPath(site.footer.contact.addressIcon.src)} alt={site.footer.contact.addressIcon.alt} loading="lazy" />
+                        {site.footer.contact.location}
+                    </p>
                     {
                         contactEmailHref ? (
-                            <a class="mt-1 inline-flex font-medium text-lab-blue hover:text-lab-teal" href={contactEmailHref}>
+                            <a class="flex items-center gap-2 text-slate-600 no-underline hover:text-lab-blue" href={contactEmailHref}>
+                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
                                 {site.footer.contact.email}
                             </a>
                         ) : (
-                            <p class="mt-1 font-medium text-lab-blue">{site.footer.contact.email}</p>
+                            <p class="flex items-center gap-2 text-slate-600">
+                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
+                                {site.footer.contact.email}
+                            </p>
                         )
                     }
-                    <p class="mt-4 text-xs text-slate-500">© {currentYear} {site.labName}. All rights reserved.</p>
                 </section>
 
-                <div class="flex flex-col gap-3 md:items-end">
-                    <section class="flex items-center gap-4 text-left text-sm font-medium text-slate-700 md:text-right" aria-label="School">
+                <div class="flex flex-col items-start gap-0.5 md:items-center">
+                    <section class="flex items-center gap-3 text-left text-sm font-medium leading-5 text-slate-700 md:text-center" aria-label="School">
                         {
                             site.footer.school.logo && (
-                                <img class="h-14 w-auto max-w-72 object-contain" src={site.footer.school.logo} alt={site.footer.school.logoAlt} loading="lazy" />
+                                <img class="h-11 w-auto max-w-60 object-contain" src={assetPath(site.footer.school.logo.src)} alt={site.footer.school.logo.alt} loading="lazy" />
                             )
                         }
-                        <span class="h-10 border-l border-slate-300" aria-hidden="true"></span>
-                        <span>{site.footer.school.name}</span>
+                        <span class="h-8 border-l border-slate-300" aria-hidden="true"></span>
+                        <span class="whitespace-pre-line text-center text-[0.8em] leading-4">{site.footer.school.name}</span>
                     </section>
+                    <p class="text-center text-xs leading-4 text-slate-500">© {currentYear} {site.labName}</p>
                 </div>
             </div>
         </footer>

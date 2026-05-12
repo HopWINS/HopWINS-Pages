@@ -1,24 +1,61 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '@/layout/BaseLayout.astro';
-import site from '@/content/config/site.json';
-import teamConfig from '@/content/team/config.json';
-import { byOrderThenTitle, stripOrderPrefix, entrySlug } from '@/lib/content';
+import { byOrderThenTitle, entrySlug } from '@/lib/content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 
 interface TeamRow {
     member: CollectionEntry<'team'>;
+    name: string;
+    role: string;
+    people?: TeamPerson[];
+    homepage?: string;
+    email?: string;
+    photo?: {
+        src: ImageMetadata;
+        alt: string;
+        caption?: string;
+    };
+    period?: string;
+    position?: string;
 }
 
 interface TeamGroup {
     id: string;
     label: string;
     order: number;
+    layout: string;
     rows: TeamRow[];
+    columns?: Record<string, string>;
 }
 
-const members = (await getCollection('team', ({ data }) => !data.draft)).sort(byOrderThenTitle);
-const memberRows = members.map((member) => ({ member }));
+interface TeamPerson {
+    name: string;
+    homepage?: string;
+}
+
+const categoryDefinitions = [
+    { id: 'pi', order: 10, layout: 'cards' },
+    { id: 'phd', order: 20, layout: 'cards' },
+    { id: 'intern', order: 30, layout: 'table' },
+    { id: 'alumni', order: 90, layout: 'table' },
+];
+const defaultAlumniColumns = { role: 'ROLE', name: 'NAME', period: 'PERIOD', position: 'POSITION' };
+
+const teamPage = await getEntry('team', 'index');
+const categoryEntries = new Map(
+    await Promise.all(
+        categoryDefinitions.map(async (category) => {
+            const entry = await getEntry('team', `${category.id}/index`);
+            return [category.id, entry?.data] as const;
+        }),
+    ),
+);
+const members = (await getCollection('team', ({ data }) => !data.draft))
+    .filter((member) => entrySlug(member) !== 'index')
+    .sort(byOrderThenTitle);
 
 function titleCase(value: string) {
     return value.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -35,19 +72,65 @@ function initials(name: string) {
 }
 
 function categoryFromPath(member: CollectionEntry<'team'>) {
-    return stripOrderPrefix(entrySlug(member).split('/')[0] ?? 'other');
+    return entrySlug(member).split('/')[0] ?? 'other';
 }
 
-const categoryConfig = new Map(teamConfig.categories.map((category) => [category.id, category]));
+function normalizePerson(person: string | { name: string; homepage?: string }): TeamPerson {
+    return typeof person === 'string'
+        ? { name: person.trim() }
+        : { name: person.name.trim(), homepage: person.homepage };
+}
+
+const categoryConfig = new Map(categoryDefinitions.map((category) => [category.id, category]));
+
+function rowsForMember(member: CollectionEntry<'team'>): TeamRow[] {
+    if (member.data.members) {
+        return Object.entries(member.data.members).map(([role, people]) => ({
+            member,
+            name: role,
+            role,
+            people: people.map(normalizePerson).filter((person) => person.name),
+        }));
+    }
+
+    if (member.data.alumni) {
+        return member.data.alumni.map((person) => ({
+            member,
+            name: person.name,
+            role: person.role,
+            homepage: person.homepage,
+            period: person.period,
+            position: person.position,
+        }));
+    }
+
+    return [{
+        member,
+        name: member.data.name ?? '',
+        role: member.data.role ?? '',
+        homepage: member.data.homepage,
+        email: member.data.email,
+        photo: member.data.photo as TeamRow['photo'],
+    }];
+}
 
 const grouped = new Map<string, TeamGroup>();
+const memberRows = members.flatMap(rowsForMember).filter((row) => row.name || row.role || row.people);
+
 for (const row of memberRows) {
     const categoryId = categoryFromPath(row.member);
     const config = categoryConfig.get(categoryId);
+
+    if (!config) {
+        continue;
+    }
+
     const group = grouped.get(categoryId) ?? {
         id: categoryId,
-        label: config?.label ?? titleCase(categoryId),
-        order: config?.order ?? 999,
+        label: categoryEntries.get(categoryId)?.title ?? titleCase(categoryId),
+        order: config.order,
+        layout: config.layout,
+        columns: categoryEntries.get(categoryId)?.columns,
         rows: [],
     };
 
@@ -56,56 +139,150 @@ for (const row of memberRows) {
 }
 
 const groups = [...grouped.values()].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
-const page = site.pages.team;
+const pageTitle = teamPage?.data.title ?? 'Team';
 
 function emailHref(email: string) {
     return email.includes('@') ? `mailto:${email}` : null;
 }
+
+function alumniCell(row: TeamRow, key: string) {
+    if (key === 'position') {
+        return row.position;
+    }
+
+    return row[key as keyof TeamRow];
+}
 ---
 
-<BaseLayout title={page.title} description={page.description} heading={page.title}>
-    <section class="page-band grid gap-10 py-10">
+<BaseLayout title={pageTitle} description={pageTitle} heading={pageTitle}>
+    <section class="page-band grid gap-8 py-10">
         {
             groups.map((group) => (
                 <section aria-labelledby={`team-${group.id}`}>
-                    <h2 id={`team-${group.id}`} class="mb-4 font-serif text-3xl font-semibold tracking-normal text-slate-950">{group.label}</h2>
-                    <div class="grid gap-3">
-                        {group.rows.map(({ member }) => (
-                            <article class="row-card grid gap-4 border-l-4 border-l-lab-blue p-4 sm:grid-cols-[7rem_minmax(0,1fr)] sm:items-center md:grid-cols-[8rem_minmax(0,1fr)]">
-                                <div class="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md bg-lab-sky text-xl font-semibold text-lab-blue md:h-32 md:w-32">
-                                    {member.data.photo ? (
-                                        <img class="h-full w-full object-cover" src={member.data.photo.src} alt={member.data.photo.alt} loading="lazy" />
-                                    ) : (
-                                        initials(member.data.name)
-                                    )}
-                                </div>
-                                <div class="min-w-0">
-                                    <h3 class="text-lg font-semibold text-slate-950">
-                                        {member.data.homepage ? (
-                                            <a class="text-slate-950 no-underline hover:text-lab-blue" href={member.data.homepage}>
-                                                {member.data.name}
-                                            </a>
-                                        ) : (
-                                            member.data.name
-                                        )}
-                                    </h3>
-                                    <p class="mt-1 text-sm font-medium text-slate-600">{member.data.role}</p>
-                                    {member.data.alumniCurrent && <p class="mt-1 text-sm text-slate-500">{member.data.alumniCurrent}</p>}
-                                    {
-                                        member.data.email && (
-                                            emailHref(member.data.email) ? (
-                                                <a class="mt-2 inline-flex text-sm font-medium text-lab-blue no-underline hover:text-lab-blue-dark hover:underline" href={emailHref(member.data.email)}>
-                                                    {member.data.email}
-                                                </a>
+                    <h2 id={`team-${group.id}`} class="mb-3 font-serif text-2xl font-semibold tracking-normal text-slate-950">{group.label}</h2>
+                    {
+                        group.layout === 'cards' ? (
+                            <div class="grid gap-3 md:grid-cols-2">
+                                {group.rows.map((row) => (
+                                    <article class="row-card grid gap-3 border-l-4 border-l-lab-blue p-3 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center">
+                                        <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-lab-sky text-lg font-semibold text-lab-blue">
+                                            {row.photo ? (
+                                                <Image class="h-full w-full object-cover" src={row.photo.src} alt={row.photo.alt} loading="lazy" />
                                             ) : (
-                                                <p class="mt-2 text-sm font-medium text-lab-blue">{member.data.email}</p>
-                                            )
+                                                initials(row.name)
+                                            )}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h3 class="text-base font-semibold leading-6 text-slate-950">
+                                                {row.homepage ? (
+                                                    <a class="text-slate-950 no-underline hover:text-lab-blue" href={row.homepage}>
+                                                        {row.name}
+                                                    </a>
+                                                ) : (
+                                                    row.name
+                                                )}
+                                            </h3>
+                                            <p class="mt-0.5 text-sm font-medium text-slate-600">{row.role}</p>
+                                            {
+                                                row.email && (
+                                                    emailHref(row.email) ? (
+                                                        <a class="mt-1 inline-flex text-sm font-medium text-lab-blue no-underline hover:text-lab-blue-dark hover:underline" href={emailHref(row.email)}>
+                                                            {row.email}
+                                                        </a>
+                                                    ) : (
+                                                        <p class="mt-1 text-sm font-medium text-lab-blue">{row.email}</p>
+                                                    )
+                                                )
+                                            }
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-t border-slate-200 text-left text-sm">
+                                    {
+                                        group.id === 'alumni' && (
+                                            <thead class="text-xs font-bold uppercase tracking-normal text-lab-blue">
+                                                <tr class="border-b border-slate-200">
+                                                    {Object.entries(group.columns ?? defaultAlumniColumns).map(([key, label]) => (
+                                                        <th class:list={[
+                                                            'py-2',
+                                                            key === 'name' && 'w-44 pr-4',
+                                                            key === 'role' && 'w-44 px-4',
+                                                            key === 'period' && 'hidden w-44 whitespace-nowrap px-4 sm:table-cell',
+                                                            key === 'position' && 'pl-4',
+                                                        ]}>{label}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
                                         )
                                     }
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+                                    <tbody>
+                                        {group.rows.map((row) => (
+                                            <tr class="border-t border-slate-200">
+                                                {
+                                                    group.id === 'alumni' ? (
+                                                        Object.keys(group.columns ?? defaultAlumniColumns).map((key) => (
+                                                            <td class:list={[
+                                                                'py-2.5',
+                                                                key === 'name' && 'w-44 pr-4',
+                                                                key === 'role' && 'w-44 px-4 font-medium text-slate-950',
+                                                                key === 'period' && 'hidden w-44 whitespace-nowrap px-4 font-medium text-slate-950 sm:table-cell',
+                                                                key === 'position' && 'pl-4 font-medium text-slate-950',
+                                                            ]}>
+                                                                {key === 'name' ? (
+                                                                    row.homepage ? (
+                                                                        <a class="font-medium text-slate-950 no-underline hover:text-lab-blue" href={row.homepage}>
+                                                                            {row.name}
+                                                                        </a>
+                                                                    ) : (
+                                                                        <span class="font-medium text-slate-950">{row.name}</span>
+                                                                    )
+                                                                ) : (
+                                                                    alumniCell(row, key)
+                                                                )}
+                                                            </td>
+                                                        ))
+                                                    ) : (
+                                                        <>
+                                                            <td class="w-44 py-2.5 pr-4 font-bold text-lab-blue">{row.role}</td>
+                                                            <td class="px-4 py-2.5">
+                                                                {row.people ? (
+                                                                    row.people.length > 0 ? (
+                                                                        <span class="leading-6">
+                                                                            {row.people.map((person, index) => (
+                                                                                <span>
+                                                                                    {person.homepage ? (
+                                                                                        <a class="font-medium text-slate-950 no-underline hover:text-lab-blue" href={person.homepage}>
+                                                                                            {person.name}
+                                                                                        </a>
+                                                                                    ) : (
+                                                                                        <span class="font-medium text-slate-950">{person.name}</span>
+                                                                                    )}
+                                                                                    {index < row.people!.length - 1 && <span class="text-slate-500">, </span>}
+                                                                                </span>
+                                                                            ))}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span class="sr-only">No members listed</span>
+                                                                    )
+                                                                ) : row.homepage ? (
+                                                                    <a class="font-medium text-slate-950 no-underline hover:text-lab-blue" href={row.homepage}>{row.name}</a>
+                                                                ) : (
+                                                                    <span class="font-medium text-slate-950">{row.name}</span>
+                                                                )}
+                                                            </td>
+                                                        </>
+                                                    )
+                                                }
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    }
                 </section>
             ))
         }

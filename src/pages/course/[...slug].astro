@@ -1,35 +1,39 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '@/layout/BaseLayout.astro';
-import { isFolderIndex, orderedContentDirectoryRoute, orderedFolderRoute } from '@/lib/content';
+import { entrySlug, folderRoute } from '@/lib/content';
 
 export async function getStaticPaths() {
     const courses = await getCollection('course', ({ data }) => !data.draft);
-    const courseIndexes = new Map(
-        courses.filter(isFolderIndex).map((course) => [orderedContentDirectoryRoute(course), course]),
-    );
 
-    return courses.map((course) => ({
-        params: { slug: orderedFolderRoute(course) },
-        props: {
-            course,
-            rootCourse: courseIndexes.get(orderedContentDirectoryRoute(course)) ?? course,
-            basePath: `/course/${orderedContentDirectoryRoute(course)}/`,
-        },
-    }));
+    return courses
+        .filter((course) => entrySlug(course) !== 'index')
+        .map((course) => {
+            const courseId = entrySlug(course).split('/')[0] ?? '';
+
+            return {
+                params: { slug: folderRoute(course) },
+                props: {
+                    course,
+                    courseId,
+                    basePath: `/course/${courseId}/`,
+                },
+            };
+        });
 }
 
-const { course, rootCourse, basePath } = Astro.props;
+const { course, courseId, basePath } = Astro.props;
 const { Content } = await render(course);
-const metaItems = [rootCourse.data.code, rootCourse.data.semester].filter(Boolean);
-const metaNote = metaItems.join(' | ');
-const displayTitle = rootCourse.data.shortName ?? rootCourse.data.title ?? course.data.title ?? 'Course';
-const description = rootCourse.data.note ?? displayTitle;
+const coursePage = await getEntry('course', 'index');
+const courseMeta = coursePage?.data.courses.find((item) => item.id === courseId);
+const displayTitle = courseMeta?.title ?? course.data.title ?? 'Course';
+const description = courseMeta?.description ?? displayTitle;
+const courseNote = [courseMeta?.code, courseMeta?.semester].filter(Boolean).join(' | ');
 ---
 
-<BaseLayout title={displayTitle} description={description} basePath={basePath} heading={displayTitle} eyebrow={metaNote}>
+<BaseLayout title={displayTitle} description={description} basePath={basePath} heading={displayTitle} eyebrow={courseNote}>
     <section class="page-band py-10">
-        <article class="prose-lab rounded-md border border-slate-200 bg-white p-6">
+        <article class="prose-lab markdown-page">
             <Content />
         </article>
     </section>

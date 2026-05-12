@@ -14,6 +14,8 @@
 @layer base {
     html {
         scroll-behavior: smooth;
+        scrollbar-gutter: stable;
+        overflow-y: scroll;
     }
 
     body {
@@ -46,16 +48,40 @@
         @apply max-w-none break-words text-slate-700;
     }
 
+    .prose-lab h1 {
+        @apply mt-9 mb-4 border-b border-lab-sky pb-2 font-serif text-3xl font-semibold leading-tight text-lab-blue-dark;
+    }
+
     .prose-lab h2 {
-        @apply mt-8 mb-3 border-b border-lab-sky pb-2 font-serif text-2xl font-semibold text-lab-blue-dark;
+        @apply mt-8 mb-3 border-b border-lab-sky pb-2 font-serif text-2xl font-semibold leading-tight text-lab-blue-dark;
     }
 
     .prose-lab h3 {
-        @apply mt-6 mb-2 font-serif text-xl font-semibold text-lab-blue-dark;
+        @apply mt-7 mb-2 font-serif text-xl font-semibold leading-snug text-lab-blue-dark;
+    }
+
+    .prose-lab h4 {
+        @apply mt-6 mb-2 border-l-4 border-lab-blue pl-3 text-lg font-semibold leading-snug text-slate-950;
+    }
+
+    .prose-lab h5 {
+        @apply mt-5 mb-2 text-base font-semibold leading-snug text-lab-blue-dark;
+    }
+
+    .prose-lab h6 {
+        @apply mt-4 mb-2 text-sm font-semibold uppercase leading-snug tracking-normal text-slate-600;
     }
 
     .prose-lab p {
         @apply my-4 leading-7;
+    }
+
+    .prose-lab strong {
+        @apply font-semibold text-slate-950;
+    }
+
+    .prose-lab em {
+        @apply text-slate-800;
     }
 
     .prose-lab ul,
@@ -71,8 +97,116 @@
         @apply list-decimal;
     }
 
+    .prose-lab li {
+        @apply my-1.5;
+    }
+
+    .prose-lab li::marker {
+        @apply font-semibold text-lab-blue;
+    }
+
     .prose-lab a {
-        @apply font-medium text-lab-blue hover:text-lab-blue-dark;
+        @apply font-medium text-lab-blue underline decoration-lab-teal/60 decoration-1 underline-offset-4 hover:text-lab-blue-dark hover:decoration-lab-blue;
+    }
+
+    .prose-lab blockquote {
+        @apply my-5 border-l-4 border-lab-teal bg-lab-sky/45 px-4 py-2 text-slate-700;
+    }
+
+    .prose-lab blockquote p {
+        @apply my-2;
+    }
+
+    .prose-lab hr {
+        @apply my-8 border-0 border-t border-slate-200;
+    }
+
+    .prose-lab code {
+        @apply rounded bg-slate-100 px-1.5 py-0.5 text-[0.92em] font-medium text-lab-blue-dark;
+    }
+
+    .prose-lab pre {
+        @apply my-5 overflow-x-auto rounded-md border border-slate-200 bg-slate-950 p-4 text-sm leading-6 text-slate-100;
+    }
+
+    .prose-lab pre code {
+        @apply rounded-none bg-transparent p-0 text-inherit;
+    }
+
+    .prose-lab table {
+        @apply my-6 block w-full overflow-x-auto border-collapse text-left text-sm;
+    }
+
+    .prose-lab thead {
+        @apply border-b border-slate-300 text-xs font-semibold uppercase text-lab-blue;
+    }
+
+    .prose-lab tbody tr {
+        @apply border-b border-slate-200;
+    }
+
+    .prose-lab th,
+    .prose-lab td {
+        @apply px-3 py-2 align-top;
+    }
+
+    .prose-lab th:first-child,
+    .prose-lab td:first-child {
+        @apply pl-0;
+    }
+
+    .prose-lab th:last-child,
+    .prose-lab td:last-child {
+        @apply pr-0;
+    }
+
+    .prose-lab img {
+        @apply my-5 rounded-md border border-slate-200;
+    }
+
+    .prose-lab figure {
+        @apply my-6;
+    }
+
+    .prose-lab figcaption {
+        @apply mt-2 text-sm text-slate-500;
+    }
+
+    .markdown-page {
+        @apply mx-auto max-w-4xl text-[1.05rem] leading-8;
+    }
+
+    .markdown-page h1 {
+        @apply mt-10 mb-4 text-3xl;
+    }
+
+    .markdown-page h2 {
+        @apply mt-10 mb-4 text-2xl;
+    }
+
+    .markdown-page h3 {
+        @apply mt-8 mb-3 text-2xl;
+    }
+
+    .markdown-page h4 {
+        @apply mt-7 mb-2 text-xl;
+    }
+
+    .markdown-page h5 {
+        @apply mt-6 mb-2 text-lg;
+    }
+
+    .markdown-page h6 {
+        @apply mt-5 mb-2 text-sm;
+    }
+
+    .markdown-page p,
+    .markdown-page li {
+        @apply leading-8;
+    }
+
+    .markdown-inline {
+        @apply mx-0 max-w-none;
     }
 
     .news-line p {

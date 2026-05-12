@@ -1,20 +1,30 @@
 ---
-import { getCollection } from 'astro:content';
+import { getEntry } from 'astro:content';
 import BaseLayout from '@/layout/BaseLayout.astro';
 import PublicationItem from '@/layout/PublicationItem.astro';
-import site from '@/content/config/site.json';
-import { byNewestDate, yearFromDate } from '@/lib/content';
 import type { CollectionEntry } from 'astro:content';
 
+type PublicationPaper = CollectionEntry<'publication'>['data']['publication'][number];
+
 interface PublicationRow {
-    publication: CollectionEntry<'publication'>;
+    paper: PublicationPaper;
     year: number;
 }
 
-const publications = (await getCollection('publication', ({ data }) => !data.draft)).sort(byNewestDate);
-const publicationRows = publications.map((publication) => ({
-    publication,
-    year: yearFromDate(publication.data.date),
+const publicationPage = await getEntry('publication', 'index');
+const researchPage = await getEntry('research', 'index');
+
+if (!publicationPage) {
+    throw new Error('Missing src/content/publication/index.md');
+}
+
+const researchLinks = Object.fromEntries((researchPage?.data.areas ?? []).map((area) => [area.id, { label: area.name, href: `/research/${area.id}/` }]));
+const publicationRows = publicationPage.data.publication
+    .filter((paper) => !paper.draft)
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .map((paper) => ({
+        paper,
+        year: paper.date.getUTCFullYear(),
 }));
 
 const grouped = publicationRows.reduce<Map<number, PublicationRow[]>>((groups, row) => {
@@ -23,17 +33,17 @@ const grouped = publicationRows.reduce<Map<number, PublicationRow[]>>((groups, r
     groups.set(row.year, rows);
     return groups;
 }, new Map<number, PublicationRow[]>());
-const page = site.pages.publication;
+const pageTitle = publicationPage.data.title;
 ---
 
-<BaseLayout title={page.title} description={page.description} heading={page.title}>
+<BaseLayout title={pageTitle} description={pageTitle} heading={pageTitle}>
     <section class="page-band grid gap-8 py-10">
         {
             [...grouped.entries()].map(([year, rows]) => (
                 <section aria-labelledby={`year-${year}`}>
                     <h2 id={`year-${year}`} class="mb-4 font-serif text-3xl font-semibold tracking-normal text-slate-950">{year}</h2>
                     <div class="grid gap-4">
-                        {rows.map((row) => <PublicationItem publication={row.publication} />)}
+                        {rows.map((row) => <PublicationItem paper={row.paper} researchLinks={researchLinks} />)}
                     </div>
                 </section>
             ))

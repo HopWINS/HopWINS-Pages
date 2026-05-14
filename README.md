@@ -1,7 +1,7 @@
 <h1 align="center">HopWINS Pages</h1>
 
 <p align="center">
-Webpage for HopWINS Lab at Johns Hopkins University.<br>
+Webpage for HopWINS Lab at Johns Hopkins University<br>
 Powered by Astro&nbsp;&nbsp;&nbsp;&nbsp;Deployed via Cloudflare
 </p>
 

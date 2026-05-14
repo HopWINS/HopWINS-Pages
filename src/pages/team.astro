@@ -6,8 +6,10 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 
+type TeamMemberEntry = CollectionEntry<'teamMember'>;
+type TeamGroupEntry = CollectionEntry<'teamGroup'>;
+
 interface TeamRow {
-    member: CollectionEntry<'team'>;
     name: string;
     role: string;
     people?: TeamPerson[];
@@ -16,7 +18,6 @@ interface TeamRow {
     photo?: {
         src: ImageMetadata;
         alt: string;
-        caption?: string;
     };
     period?: string;
     position?: string;
@@ -45,16 +46,16 @@ const categoryDefinitions = [
 const defaultAlumniColumns = { role: 'ROLE', name: 'NAME', period: 'PERIOD', position: 'POSITION' };
 
 const teamPage = await getEntry('team', 'index');
-const categoryEntries = new Map(
+const groupEntries = new Map(
     await Promise.all(
         categoryDefinitions.map(async (category) => {
-            const entry = await getEntry('team', `${category.id}/index`);
-            return [category.id, entry?.data] as const;
+            const entry = await getEntry('teamGroup', `${category.id}/index`);
+            return [category.id, entry] as const;
         }),
     ),
 );
-const members = (await getCollection('team', ({ data }) => !data.draft))
-    .filter((member) => entrySlug(member) !== 'index')
+const members = (await getCollection('teamMember'))
+    .filter((member) => !entrySlug(member).endsWith('/index'))
     .sort(byOrderThenTitle);
 
 function titleCase(value: string) {
@@ -71,7 +72,7 @@ function initials(name: string) {
         .toUpperCase();
 }
 
-function categoryFromPath(member: CollectionEntry<'team'>) {
+function categoryFromPath(member: TeamMemberEntry) {
     return entrySlug(member).split('/')[0] ?? 'other';
 }
 
@@ -81,21 +82,29 @@ function normalizePerson(person: string | { name: string; homepage?: string }): 
         : { name: person.name.trim(), homepage: person.homepage };
 }
 
-const categoryConfig = new Map(categoryDefinitions.map((category) => [category.id, category]));
+function memberRowsForCategory(categoryId: string): TeamRow[] {
+    return members
+        .filter((member) => categoryFromPath(member) === categoryId)
+        .map((member) => ({
+            name: member.data.name,
+            role: member.data.role,
+            homepage: member.data.homepage,
+            email: member.data.email,
+            photo: member.data.photo as TeamRow['photo'],
+        }));
+}
 
-function rowsForMember(member: CollectionEntry<'team'>): TeamRow[] {
-    if (member.data.members) {
-        return Object.entries(member.data.members).map(([role, people]) => ({
-            member,
+function tableRowsForGroup(categoryId: string, entry: TeamGroupEntry | undefined): TeamRow[] {
+    if (categoryId === 'intern' && entry?.data.members) {
+        return Object.entries(entry.data.members).map(([role, people]) => ({
             name: role,
             role,
             people: people.map(normalizePerson).filter((person) => person.name),
         }));
     }
 
-    if (member.data.alumni) {
-        return member.data.alumni.map((person) => ({
-            member,
+    if (categoryId === 'alumni' && entry?.data.alumni) {
+        return entry.data.alumni.map((person) => ({
             name: person.name,
             role: person.role,
             homepage: person.homepage,
@@ -104,41 +113,27 @@ function rowsForMember(member: CollectionEntry<'team'>): TeamRow[] {
         }));
     }
 
-    return [{
-        member,
-        name: member.data.name ?? '',
-        role: member.data.role ?? '',
-        homepage: member.data.homepage,
-        email: member.data.email,
-        photo: member.data.photo as TeamRow['photo'],
-    }];
+    return [];
 }
 
-const grouped = new Map<string, TeamGroup>();
-const memberRows = members.flatMap(rowsForMember).filter((row) => row.name || row.role || row.people);
+const groups = categoryDefinitions
+    .map((config): TeamGroup => {
+        const entry = groupEntries.get(config.id);
 
-for (const row of memberRows) {
-    const categoryId = categoryFromPath(row.member);
-    const config = categoryConfig.get(categoryId);
+        return {
+            id: config.id,
+            label: entry?.data.title ?? titleCase(config.id),
+            order: config.order,
+            layout: config.layout,
+            columns: entry?.data.columns,
+            rows: config.layout === 'cards'
+                ? memberRowsForCategory(config.id)
+                : tableRowsForGroup(config.id, entry),
+        };
+    })
+    .filter((group) => group.rows.length > 0)
+    .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 
-    if (!config) {
-        continue;
-    }
-
-    const group = grouped.get(categoryId) ?? {
-        id: categoryId,
-        label: categoryEntries.get(categoryId)?.title ?? titleCase(categoryId),
-        order: config.order,
-        layout: config.layout,
-        columns: categoryEntries.get(categoryId)?.columns,
-        rows: [],
-    };
-
-    group.rows.push(row);
-    grouped.set(categoryId, group);
-}
-
-const groups = [...grouped.values()].sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 const pageTitle = teamPage?.data.title ?? 'Team';
 
 function emailHref(email: string) {

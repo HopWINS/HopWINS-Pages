@@ -4,11 +4,11 @@ import BaseLayout from '@/layout/BaseLayout.astro';
 
 export async function getStaticPaths() {
     const publicationPage = await getEntry('publication', 'index');
-    const projectPapers = publicationPage?.data.publication.filter((paper) => !paper.draft && paper.project) ?? [];
+    const projectPapers = publicationPage?.data.publication.filter((paper) => paper.project) ?? [];
     const paths = await Promise.all(projectPapers.map(async (paper) => {
-        const entry = await getEntry('publication', `${paper.id}/index`);
+        const entry = await getEntry('publicationProject', `${paper.id}/index`);
 
-        if (!entry || entry.data.draft) {
+        if (!entry) {
             return null;
         }
 

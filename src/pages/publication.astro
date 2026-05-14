@@ -20,7 +20,6 @@ if (!publicationPage) {
 
 const researchLinks = Object.fromEntries((researchPage?.data.areas ?? []).map((area) => [area.id, { label: area.name, href: `/research/${area.id}/` }]));
 const publicationRows = publicationPage.data.publication
-    .filter((paper) => !paper.draft)
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map((paper) => ({
         paper,

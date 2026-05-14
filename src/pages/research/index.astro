@@ -16,10 +16,10 @@ const researchAssets = import.meta.glob<ImageMetadata>('/src/content/research/*/
     import: 'default',
     eager: true,
 });
-const researchEntries = researchPage.data.areas.filter((area) => !area.draft);
-const publications = (publicationPage?.data.publication ?? []).filter((paper) => !paper.draft);
+const researchEntries = researchPage.data.areas;
+const publications = publicationPage?.data.publication ?? [];
 const pageTitle = researchPage.data.title;
-const defaultPublicationLimit = researchPage.data.pubLimit ?? researchPage.data.publicationLimit;
+const defaultPublicationLimit = researchPage.data.pubLimit;
 
 type PublicationPaper = CollectionEntry<'publication'>['data']['publication'][number];
 
@@ -72,8 +72,8 @@ function recentPublications(areaId: string, limit: number) {
                     const href = `/research/${entry.id}/`;
                     const cover = entry.image[0];
                     const coverSrc = resolveResearchImage(entry.id, cover.src);
-                    const publicationLimit = entry.pubLimit ?? entry.publicationLimit ?? defaultPublicationLimit;
-                    const recentPapers = recentPublications(entry.id, publicationLimit);
+                    const pubLimit = entry.pubLimit ?? defaultPublicationLimit;
+                    const recentPapers = recentPublications(entry.id, pubLimit);
 
                     return (
                     <article class:list={[

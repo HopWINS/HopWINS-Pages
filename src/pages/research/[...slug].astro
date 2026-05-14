@@ -7,13 +7,13 @@ import type { ImageMetadata } from 'astro';
 
 export async function getStaticPaths() {
     const researchPage = await getEntry('research', 'index');
-    const areas = researchPage?.data.areas.filter((area) => !area.draft) ?? [];
+    const areas = researchPage?.data.areas ?? [];
     const paths = [];
 
     for (const area of areas) {
-        const entry = await getEntry('research', `${area.id}/index`);
+        const entry = await getEntry('researchDetail', `${area.id}/index`);
 
-        if (entry && !entry.data.draft) {
+        if (entry) {
             paths.push({
                 params: { slug: area.id },
                 props: { entry, area },
@@ -32,7 +32,7 @@ const publicationPage = await getEntry('publication', 'index');
 const researchLinks = Object.fromEntries((researchPage?.data.areas ?? []).map((researchArea) => [researchArea.id, { label: researchArea.name, href: `/research/${researchArea.id}/` }]));
 const publications = (publicationPage?.data.publication ?? [])
     .filter((paper) => {
-        return !paper.draft && paper.research.includes(area.id);
+        return paper.research.includes(area.id);
     })
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 const researchAssets = import.meta.glob<ImageMetadata>('/src/content/research/*/assets/*.{jpg,jpeg,png,webp,svg}', {

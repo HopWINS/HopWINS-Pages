@@ -54,7 +54,6 @@ const publicationPaperSchema = z.object({
     research: z.array(z.string()).default([]),
     project: z.boolean().default(false),
     links: z.record(z.string(), hrefSchema).default({}),
-    draft: z.boolean().default(false),
 });
 
 const researchAreaSchema = z.object({
@@ -62,13 +61,11 @@ const researchAreaSchema = z.object({
     name: z.string(),
     description: z.string(),
     pubLimit: z.number().int().min(0).optional(),
-    publicationLimit: z.number().int().min(0).optional(),
     image: z.array(z.object({
         src: z.string(),
         alt: z.string().default(''),
         caption: z.string().optional(),
     })).min(1),
-    draft: z.boolean().default(false),
 });
 
 type ImageSchemaFactory = () => z.ZodTypeAny;
@@ -111,54 +108,81 @@ const news = defineCollection({
 });
 
 const research = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/research', generateId: keepFilePathId }),
+    loader: glob({ pattern: 'index.md', base: './src/content/research', generateId: keepFilePathId }),
     schema: z.object({
         title: z.string(),
-        pubLimit: z.number().int().min(0).optional(),
-        publicationLimit: z.number().int().min(0).default(2),
+        pubLimit: z.number().int().min(0).default(2),
         areas: z.array(researchAreaSchema).default([]),
-        draft: z.boolean().default(false),
+    }),
+});
+
+const researchDetail = defineCollection({
+    loader: glob({ pattern: '*/index.md', base: './src/content/research', generateId: keepFilePathId }),
+    schema: z.object({
+        title: z.string(),
     }),
 });
 
 const publication = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/publication', generateId: keepFilePathId }),
+    loader: glob({ pattern: 'index.md', base: './src/content/publication', generateId: keepFilePathId }),
     schema: z.object({
         title: z.string(),
         publication: z.array(publicationPaperSchema).default([]),
-        draft: z.boolean().default(false),
+    }),
+});
+
+const publicationProject = defineCollection({
+    loader: glob({ pattern: '*/index.md', base: './src/content/publication', generateId: keepFilePathId }),
+    schema: z.object({
+        title: z.string(),
     }),
 });
 
 const team = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/team', generateId: keepFilePathId }),
-    schema: ({ image }) => z.object({
-        title: z.string().optional(),
-        name: z.string().optional(),
-        role: z.string().optional(),
+    loader: glob({ pattern: 'index.md', base: './src/content/team', generateId: keepFilePathId }),
+    schema: z.object({
+        title: z.string(),
+    }),
+});
+
+const teamGroup = defineCollection({
+    loader: glob({ pattern: '*/index.md', base: './src/content/team', generateId: keepFilePathId }),
+    schema: z.object({
+        title: z.string(),
         members: z.record(z.string(), z.array(teamPersonSchema)).optional(),
         alumni: z.array(alumniPersonSchema).optional(),
         columns: tableColumnsSchema.optional(),
+    }),
+});
+
+const teamMember = defineCollection({
+    loader: glob({ pattern: ['pi/*.md', 'phd/*.md', '!pi/index.md', '!phd/index.md'], base: './src/content/team', generateId: keepFilePathId }),
+    schema: ({ image }) => z.object({
+        title: z.string().optional(),
+        name: z.string(),
+        role: z.string(),
         order: z.number().default(999),
         photo: z.object({
             src: imageFromAssets(image),
             alt: z.string().default(''),
-            caption: z.string().optional(),
         }).optional(),
         homepage: hrefSchema.optional(),
         email: hrefSchema.optional(),
-        draft: z.boolean().default(false),
     }),
 });
 
 const course = defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/course', generateId: keepFilePathId }),
+    loader: glob({ pattern: 'index.md', base: './src/content/course', generateId: keepFilePathId }),
     schema: z.object({
-        title: z.string().optional(),
+        title: z.string(),
         courses: z.array(courseInfoSchema).default([]),
         teaching: z.array(teachingSchema).default([]),
-        draft: z.boolean().default(false),
     }),
+});
+
+const coursePage = defineCollection({
+    loader: glob({ pattern: '*/*.md', base: './src/content/course', generateId: keepFilePathId }),
+    schema: z.object({}),
 });
 
 const join = defineCollection({
@@ -208,9 +232,14 @@ export const collections = {
     index,
     news,
     research,
+    researchDetail,
     publication,
+    publicationProject,
     team,
+    teamGroup,
+    teamMember,
     course,
+    coursePage,
     join,
     site,
 };

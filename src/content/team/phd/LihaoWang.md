@@ -4,7 +4,7 @@ role: "PhD Student"
 order: 202408
 email: "lwang231@jhu.edu"
 photo:
-    src: "LihaoWang.png"
+    src: "LihaoWang.jpeg"
     alt: "Lihao Wang"
 homepage: "https://theeagleofthedesert.github.io"
 ---

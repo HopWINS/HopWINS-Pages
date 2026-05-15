@@ -1,20 +1,18 @@
 ---
 title: "News"
 news:
-    - date: 2025-08
-      text: "Invited to serve on [MobiCom ’26](https://www.sigmobile.org/mobisys/2025) TPC. Please consider submitting!"
-    - date: 2024-12
-      text: "UbiComp ’25 paper: WULoc, Wi-Fi to UWB CTC for Long-Range High-precision Localization."
-    - date: 2024-12
-      text: "MobiCom ’25 paper: NanoScatter, ambient IoT backscatter system with IC design."
+    - date: 2026-05
+      text: "Ruirong presented 3in1 paper at SenSys '26."
+    - date: 2026-02
+      text: "Received the hardware for the NVIDIA Academic Grant. Thanks NVIDIA's support!"
+    - date: 2025-09
+      text: "3in1 paper accepted by SenSys '26. Congratulations Ruirong!"
+    - date: 2025-05
+      text: "Received the A2pilot award for MusTrack. Thanks NIA and JH AITC!"
     - date: 2024-10
-      text: "Invited to serve on [MobiSys ’25](https://www.sigmobile.org/mobisys/2025/) TPC. Please consider submitting!"
+      text: "3in1 wins the Best Runner-up Poster Awards at MobiCom '24. Congratulations Ruirong!"
     - date: 2024-08
-      text: "Invited to serve on [MobiCom ’25](https://www.sigmobile.org/mobicom/2025/index.html) TPC. Please consider submitting!"
-    - date: 2024-04
-      text: "MobiSys ’24 paper: HybRadar, mmWave RADAR system with hybrid beamforming array."
-    - date: 2024-04
-      text: "Invited to serve on [NSDI ’25](https://www.usenix.org/conference/nsdi25) TPC. Please consider submitting!"
-    - date: 2023-08
-      text: "Invited to serve on [HotMobile ’24](http://www.hotmobile.org/2024) TPC. Please consider submitting!"
+      text: "Ding, Lihao, Zhe join the lab. Welcome all!"
+    - date: 2024-02
+      text: "Ruirong join the lab. Welcome!"
 ---

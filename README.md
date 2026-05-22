@@ -582,7 +582,7 @@ Quick start:
 ```bash
 git clone git@github.com:HopWINS/HopWINS-Pages.git
 cd HopWINS-Pages
-npm install
+npm ci
 npm run dev
 ```
 
@@ -608,7 +608,9 @@ Suggested commit prefixes:
 Before pushing:
 
 ```bash
-git status --short
+git status
 npm run check
 npm run build
 ```
+
+For content-only edits, contributors should only modify files under `src/content/`. Do not run `npm install`, and do not commit changes to files like `package.json` or `package-lock.json`. If local preview is needed, run `npm ci` once and then use `npm run dev`.

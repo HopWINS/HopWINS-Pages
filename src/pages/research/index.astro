@@ -82,7 +82,7 @@ function recentPublications(areaId: string, limit: number) {
                             ? 'lg:grid-cols-[14rem_minmax(0,4fr)_minmax(18rem,5fr)]'
                             : 'lg:grid-cols-[14rem_minmax(0,1fr)]',
                     ]}>
-                        <a class="block aspect-[4/3] overflow-hidden rounded-md bg-slate-100 no-underline" href={href} aria-label={`Open ${entry.name}`}>
+                        <a class="block aspect-[4/3] overflow-hidden rounded-md bg-slate-100 no-underline transition hover:opacity-85" href={href} aria-label={`Open ${entry.name}`}>
                             {coverSrc && <Image class="h-full w-full object-cover" src={coverSrc} alt={cover.alt} loading="lazy" />}
                         </a>
                         <div class="min-w-0">

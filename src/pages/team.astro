@@ -160,13 +160,25 @@ function alumniCell(row: TeamRow, key: string) {
                             <div class="grid gap-3 md:grid-cols-2">
                                 {group.rows.map((row) => (
                                     <article class="row-card grid gap-3 border-l-4 border-l-lab-blue p-3 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center">
-                                        <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-lab-sky text-lg font-semibold text-lab-blue">
-                                            {row.photo ? (
-                                                <Image class="h-full w-full object-cover" src={row.photo.src} alt={row.photo.alt} loading="lazy" />
+                                        {
+                                            row.homepage ? (
+                                                <a class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-lab-sky text-lg font-semibold text-lab-blue no-underline transition hover:opacity-85" href={row.homepage} aria-label={`Open ${row.name}'s homepage`}>
+                                                    {row.photo ? (
+                                                        <Image class="h-full w-full object-cover" src={row.photo.src} alt={row.photo.alt} loading="lazy" />
+                                                    ) : (
+                                                        initials(row.name)
+                                                    )}
+                                                </a>
                                             ) : (
-                                                initials(row.name)
-                                            )}
-                                        </div>
+                                                <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-lab-sky text-lg font-semibold text-lab-blue">
+                                                    {row.photo ? (
+                                                        <Image class="h-full w-full object-cover" src={row.photo.src} alt={row.photo.alt} loading="lazy" />
+                                                    ) : (
+                                                        initials(row.name)
+                                                    )}
+                                                </div>
+                                            )
+                                        }
                                         <div class="min-w-0">
                                             <h3 class="text-base font-semibold leading-6 text-slate-950">
                                                 {row.homepage ? (

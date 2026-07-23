@@ -6,7 +6,9 @@ members:
         - Yanyu Lin
         - Zhehao Zhang
         - Dingyu Zhang
+    Undergrad Student:
+        - Oscar Munoz
+    Visiting:
         - Shengding Liu
-    Undergrad Student: []
-    Visiting: []
+        - Qian Li
 ---

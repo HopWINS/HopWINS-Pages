@@ -37,6 +37,19 @@ publication:
         website: "https://dl.acm.org/doi/10.1145/3774906.3800458"
         Project: "https://ruironghuang.github.io/3in1.html"
         PDF: "paper_3in1.pdf"
+    - id: "2026-HotMobile-SAPE"
+      title: "SAPE: Demystifying Sub-band Aware Power-Equalization for Cellular Networks"
+      authors:
+        - "Dingyu Zhang"
+        - "Ish Kumar Jain"
+        - "Renjie Zhao"
+      date: "2026-02-25"
+      venue: "HotMobile '26"
+      research:
+        - "network"
+      project: false
+      links:
+        website: "https://dl.acm.org/doi/10.1145/3789514.3792036"
     - id: "2025-IMWUT-WULoc"
       title: "WULoc: Achieving Extremely Long-range High-precision Localization via Wi-Fi-UWB Connection"
       authors:

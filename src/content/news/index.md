@@ -7,6 +7,8 @@ news:
       text: "Ruirong presented 3in1 paper at SenSys ’26."
     - date: 2026-02
       text: "Received the hardware for the NVIDIA Academic Grant. Thanks NVIDIA’s support!"
+    - date: 2025-12
+      text: "SAPE paper accepted by HotMobile ’26. Congratulations Dingyu!"
     - date: 2025-09
       text: "3in1 paper accepted by SenSys ’26. Congratulations Ruirong!"
     - date: 2025-05

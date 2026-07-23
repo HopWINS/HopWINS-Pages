@@ -1,6 +1,27 @@
 ---
 title: "Publication"
 publication:
+    - id: "2026-IMWUT-RF-HOI"
+      title: "RF-HOI: Recognize Human-Object Interaction with Radio Frequency Signals"
+      shortTitle: "RF-HOI: Recognize Human-Object Interaction with RF Signals"
+      authors:
+        - "Lihao Wang"
+        - "Linlu Gao"
+        - "Jiacan Yu"
+        - "Yanyu Lin"
+        - "Yifan Yin"
+        - "Jianxin Wang"
+        - "Tianmin Shu"
+        - "Renjie Zhao"
+      date: "2026-07"
+      venue: "IMWUT"
+      research:
+        - "sensing"
+      project: false
+      links:
+        website: "https://theeagleofthedesert.github.io/RF-HOI/"
+        Project: "https://theeagleofthedesert.github.io/RF-HOI/"
+        PDF: "https://theeagleofthedesert.github.io/RF-HOI/static/RF-HOI_paper.pdf"
     - id: "2026-SenSys-3in1"
       title: "3in1: Multi-tone Joint Powering, Clocking, and Communication for Passive IoT"
       shortTitle: "3in1: Powering, Clocking, and Communication for Passive IoT"

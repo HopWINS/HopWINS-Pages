@@ -1,6 +1,8 @@
 ---
 title: "News"
 news:
+    - date: 2026-07
+      text: "RF-HOI paper accepted by IMWUT. Congratulations Lihao!"
     - date: 2026-05
       text: "Ruirong presented 3in1 paper at SenSys ’26."
     - date: 2026-02

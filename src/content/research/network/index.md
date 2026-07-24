@@ -1,5 +1,5 @@
 ---
-title: 'Wireless Networks and Communication'
+title: 'Wireless Communication and Network'
 ---
 
 ## Overview

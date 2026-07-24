@@ -10,7 +10,7 @@ alumni:
       role: "Master Student"
       period: "2025/03 - 2025/12"
     - name: "Tianjian Xu"
-      role: "Visiting Undergrad"
+      role: "Visiting Student"
       period: "2025/08 - 2025/12"
     - name: "Makise Kurisu"
       role: "Visiting Undergrad"

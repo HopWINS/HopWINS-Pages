@@ -1,14 +1,9 @@
 ---
 title: "Intern"
 members:
-    Master Student:
-        - Linlu Gao
-        - Yanyu Lin
-        - Zhehao Zhang
-        - Dingyu Zhang
+    Master Student: []
     Undergrad Student:
         - Oscar Munoz
     Visiting:
-        - Shengding Liu
         - Qian Li
 ---

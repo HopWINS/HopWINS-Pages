@@ -21,7 +21,7 @@ publication:
       links:
         website: "https://theeagleofthedesert.github.io/RF-HOI/"
         Project: "https://theeagleofthedesert.github.io/RF-HOI/"
-        PDF: "https://theeagleofthedesert.github.io/RF-HOI/static/RF-HOI_paper.pdf"
+        arXiv: "https://arxiv.org/abs/2608.00289"
     - id: "2026-SenSys-3in1"
       title: "3in1: Multi-tone Joint Powering, Clocking, and Communication for Passive IoT"
       shortTitle: "3in1: Powering, Clocking, and Communication for Passive IoT"

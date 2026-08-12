@@ -6,6 +6,9 @@ columns:
     period: "Period"
     position: "Current Position"
 alumni:
+    - name: "Pengfei Zeng"
+      role: "Visiting Student"
+      period: "2026/06 - 2026/08"
     - name: "Linlu Gao"
       role: "Master Student"
       period: "2025/03 - 2025/12"

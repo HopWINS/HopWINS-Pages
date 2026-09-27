@@ -149,8 +149,8 @@ function isActive(href: string) {
                     }
                     {
                         site.footer.contact.sites && (
-                            <p class="flex items-center gap-2 text-slate-600">
-                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.sites.icon.src)} alt={site.footer.contact.sites.icon.alt} loading="lazy" />
+                            <p class="flex items-start gap-2 text-slate-600">
+                                <img class="mt-0.5 h-4 w-4 shrink-0" src={assetPath(site.footer.contact.sites.icon.src)} alt={site.footer.contact.sites.icon.alt} loading="lazy" />
                                 <span>
                                     <span class="sr-only">Lab sites: </span>
                                     {site.footer.contact.sites.links.map((link, index) => (
@@ -165,7 +165,7 @@ function isActive(href: string) {
                     }
                 </section>
 
-                <div class="flex flex-col items-start gap-0.5 md:items-center">
+                <div class="flex w-fit flex-col items-stretch gap-0.5">
                     <section class="flex items-center gap-3 text-left text-sm font-medium leading-5 text-slate-700 md:text-center" aria-label="School">
                         {
                             site.footer.school.logo && (

@@ -20,8 +20,8 @@ publication:
       project: false
       links:
         website: "https://theeagleofthedesert.github.io/RF-HOI/"
-        Project: "https://theeagleofthedesert.github.io/RF-HOI/"
-        arXiv: "https://arxiv.org/abs/2608.00289"
+        project: "https://theeagleofthedesert.github.io/RF-HOI/"
+        arxiv: "https://arxiv.org/abs/2608.00289"
     - id: "2026-SenSys-3in1"
       title: "3in1: Multi-tone Joint Powering, Clocking, and Communication for Passive IoT"
       shortTitle: "3in1: Powering, Clocking, and Communication for Passive IoT"
@@ -35,8 +35,8 @@ publication:
       project: false
       links:
         website: "https://dl.acm.org/doi/10.1145/3774906.3800458"
-        Project: "https://ruironghuang.github.io/3in1.html"
-        PDF: "paper_3in1.pdf"
+        project: "https://ruironghuang.github.io/3in1.html"
+        pdf: "paper_3in1.pdf"
     - id: "2026-HotMobile-SAPE"
       title: "SAPE: Demystifying Sub-band Aware Power-Equalization for Cellular Networks"
       authors:

@@ -6,10 +6,10 @@ export async function getStaticPaths() {
     const publicationPage = await getEntry('publication', 'index');
     const projectPapers = publicationPage?.data.publication.filter((paper) => paper.project) ?? [];
     const paths = await Promise.all(projectPapers.map(async (paper) => {
-        const entry = await getEntry('publicationProject', `${paper.id}/index`);
+        const entry = await getEntry('project', `${paper.id}/index`);
 
         if (!entry) {
-            return null;
+            throw new Error(`Publication ${paper.id} has project: true but is missing src/content/project/${paper.id}/index.md`);
         }
 
         return {
@@ -18,7 +18,7 @@ export async function getStaticPaths() {
         };
     }));
 
-    return paths.filter((path): path is NonNullable<(typeof paths)[number]> => path !== null);
+    return paths;
 }
 
 const { entry, paper } = Astro.props;

@@ -34,7 +34,7 @@ function resolveResearchImage(areaId: string, src: string) {
 }
 
 function resolvePublicationHref(paper: PublicationPaper, href: string) {
-    if (/^(https?:|mailto:|\/|#)/.test(href)) {
+    if (/^(https?:|mailto:|\/|#)/i.test(href)) {
         return href;
     }
 
@@ -43,10 +43,8 @@ function resolvePublicationHref(paper: PublicationPaper, href: string) {
 }
 
 function paperHref(paper: PublicationPaper) {
-    const website = Object.entries(paper.links ?? {}).find(([key]) => key.toLowerCase() === 'website');
-
-    if (website) {
-        return resolvePublicationHref(paper, website[1]);
+    if (paper.links.website) {
+        return resolvePublicationHref(paper, paper.links.website);
     }
 
     return paper.project ? `/project/${paper.id}/` : undefined;

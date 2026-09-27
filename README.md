@@ -30,6 +30,9 @@ HopWINS-Pages/
 │  │  ├─ publication/
 │  │  │  ├─ index.md
 │  │  │  └─ <publication-id>/
+│  │  │     └─ assets/
+│  │  ├─ project/
+│  │  │  └─ <publication-id>/
 │  │  │     ├─ assets/
 │  │  │     └─ index.md
 │  │  ├─ research/
@@ -80,8 +83,8 @@ HopWINS-Pages/
 | `/research/<research-id>` | `src/content/research/<research-id>/index.md` | Research detail page |
 | `/publication` | `src/content/publication/index.md` | Publication list grouped by year |
 | `/publication/<publication-id>/<asset>` | `src/content/publication/<publication-id>/assets/` | Publication assets such as PDFs |
-| `/project/<publication-id>` | `src/content/publication/<publication-id>/index.md` | Project page generated only when the publication has `project: true` |
-| `/project/<publication-id>/<asset>` | `src/content/publication/<publication-id>/assets/` | Project assets |
+| `/project/<publication-id>` | `src/content/project/<publication-id>/index.md` | Project page generated only when the publication has `project: true` |
+| `/project/<publication-id>/<asset>` | `src/content/project/<publication-id>/assets/` | Project-only assets, generated only when the publication has `project: true` |
 | `/team` | `src/content/team/` | Team page |
 | `/course` | `src/content/course/index.md` | Course list and teaching history |
 | `/course/<course-id>` | `src/content/course/<course-id>/index.md` | Course detail page |
@@ -107,6 +110,10 @@ Markdown body content goes here.
 
 The page template usually owns the visible page title, so Markdown body sections should normally start with `##`. Course detail pages and course subpages can omit frontmatter and start directly with Markdown body content. Markdown body rendering supports headings through `######`, links, lists, blockquotes, inline code, fenced code blocks, images, and tables.
 
+Content files are trusted repository input, not public user input. Review Markdown links and any raw HTML during code review before merging content changes.
+
+Frontmatter field names are case-sensitive and must use the spelling shown in this README. General fields use `camelCase`, such as `shortTitle`, `pubLimit`, and `heroImages`. Structured content uses strict schemas, so unknown or incorrectly capitalized fields fail the build instead of being silently ignored. Values used as URL path IDs are also case-sensitive and must exactly match their corresponding directory names.
+
 Use `public/` only for site-root files such as:
 
 - `favicon.ico`
@@ -117,7 +124,8 @@ Put content-specific binary files next to their content:
 - Home images: `src/content/index/assets/`
 - Site icons and logos: `src/content/site/assets/`
 - Research images: `src/content/research/<research-id>/assets/`
-- Publication PDFs and project images: `src/content/publication/<publication-id>/assets/`
+- Publication PDFs and paper-specific files: `src/content/publication/<publication-id>/assets/`
+- Project-only images and files: `src/content/project/<publication-id>/assets/`
 - Course PDFs and images: `src/content/course/<course-id>/assets/`
 - Team photos: `src/content/team/<category>/assets/`
 
@@ -295,15 +303,15 @@ publication:
       project: true
       links:
           website: "https://example.org/paper"
-          PDF: "paper.pdf"
-          Code: "https://example.org/code"
-          YouTube: "https://example.org/video"
+          pdf: "paper.pdf"
+          code: "https://example.org/code"
+          youtube: "https://example.org/video"
 ---
 ```
 
 Field notes:
 
-- `id` should match the publication folder name when local assets or a project page are needed
+- `id` must exactly match the corresponding folder name under `publication/` for local publication assets and under `project/` for a Project page
 - `title` is the full paper title
 - `shortTitle` is used only in compact research-page publication lists
 - `date` controls sorting and year grouping
@@ -311,13 +319,15 @@ Field notes:
 - `award` is displayed as a highlighted badge
 - `highlight: true` gives the publication block stronger visual emphasis
 - `research` links the paper to research areas by research `id`
-- `project: true` creates a `/project/<id>/` page from `src/content/publication/<id>/index.md` and adds a Project action link first
+- `project: true` creates a `/project/<id>/` page from `src/content/project/<id>/index.md` and adds a Project action link first
 - `links.website` is the primary paper URL; when set, the paper title links to it and `website` is not repeated as a separate button
 - Other `links` entries become action buttons in the same order they are written
+- All `links` keys are lowercase identifiers. Common keys include `project`, `pdf`, `code`, `youtube`, `video`, and `arxiv`; the page converts them to appropriate display labels
+- `links.project` is a manual external Project button and is only valid when `project` is `false`; do not combine it with the automatically generated internal Project button
 
 Publication assets belong in `src/content/publication/<publication-id>/assets/`.
 
-Relative publication links such as `PDF: "paper.pdf"` resolve to `/publication/<publication-id>/paper.pdf`.
+Relative publication links such as `pdf: "paper.pdf"` resolve to `/publication/<publication-id>/paper.pdf`.
 
 PDF action links include a download hint. Browser behavior can still vary depending on browser settings and PDF handling.
 
@@ -326,7 +336,7 @@ PDF action links include a download hint. Browser behavior can still vary depend
 A publication project page is generated when:
 
 1. The paper in `src/content/publication/index.md` has `project: true`
-2. `src/content/publication/<publication-id>/index.md` exists
+2. `src/content/project/<publication-id>/index.md` exists
 
 Example:
 
@@ -342,7 +352,11 @@ Project description.
 ![System overview](overview.webp)
 ```
 
-Project page Markdown images can reference files by filename. Image files should be stored in `src/content/publication/<publication-id>/assets/`.
+Project page Markdown can reference its own assets by filename. Store those files in `src/content/project/<publication-id>/assets/`; when the publication has `project: true`, they are served from `/project/<publication-id>/<asset>`.
+
+Publication and Project assets are intentionally separate. Keep a paper PDF used by the publication block in `src/content/publication/<publication-id>/assets/`. Do not copy it into the Project assets directory merely to link it from the Project page; link to `/publication/<publication-id>/<asset>` instead. Project assets should contain only additional files owned by the Project page, such as diagrams, screenshots, datasets, or supplementary downloads.
+
+When `project` is `false`, neither the Project page nor files under its Project assets directory are included in the static build.
 
 ### Team Page
 

@@ -3,6 +3,10 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 const hrefSchema = z.string().min(1);
+const linkIdSchema = z.string().regex(
+    /^[a-z][a-z0-9-]*$/,
+    'Link names must use lowercase letters, numbers, and hyphens.',
+);
 const keepFilePathId = ({ entry }: { entry: string }) => entry.replace(/\.(md|mdx|json)$/i, '');
 
 const teamPersonSchema = z.union([
@@ -10,7 +14,7 @@ const teamPersonSchema = z.union([
     z.object({
         name: z.string(),
         homepage: hrefSchema.optional(),
-    }),
+    }).strict(),
 ]);
 
 const alumniPersonSchema = z.object({
@@ -19,14 +23,14 @@ const alumniPersonSchema = z.object({
     period: z.string().optional(),
     position: z.string().optional(),
     homepage: hrefSchema.optional(),
-});
+}).strict();
 
 const tableColumnsSchema = z.record(z.string(), z.string());
 
 const navItemSchema = z.object({
     id: z.string(),
     label: z.string(),
-});
+}).strict();
 
 const courseInfoSchema = z.object({
     id: z.string(),
@@ -35,12 +39,12 @@ const courseInfoSchema = z.object({
     code: z.string().optional(),
     semester: z.string().optional(),
     description: z.string().optional(),
-});
+}).strict();
 
 const teachingSchema = z.object({
     semester: z.string(),
     id: z.string(),
-});
+}).strict();
 
 const publicationPaperSchema = z.object({
     id: z.string(),
@@ -53,7 +57,15 @@ const publicationPaperSchema = z.object({
     highlight: z.boolean().default(false),
     research: z.array(z.string()).default([]),
     project: z.boolean().default(false),
-    links: z.record(z.string(), hrefSchema).default({}),
+    links: z.record(linkIdSchema, hrefSchema).default({}),
+}).strict().superRefine((paper, context) => {
+    if (paper.project && paper.links.project) {
+        context.addIssue({
+            code: 'custom',
+            path: ['links'],
+            message: 'Remove links.project when project is true; the internal Project button is generated automatically.',
+        });
+    }
 });
 
 const researchAreaSchema = z.object({
@@ -65,10 +77,10 @@ const researchAreaSchema = z.object({
         src: z.string(),
         alt: z.string().default(''),
         caption: z.string().optional(),
-    })).min(1),
-});
+    }).strict()).min(1),
+}).strict();
 
-type ImageSchemaFactory = () => z.ZodTypeAny;
+type ImageSchemaFactory = () => z.ZodType;
 
 function imageFromAssets(image: ImageSchemaFactory) {
     return z.preprocess((value) => {
@@ -90,8 +102,8 @@ const index = defineCollection({
             src: imageFromAssets(image),
             alt: z.string().default(''),
             caption: z.string().optional(),
-        })).default([]),
-    }),
+        }).strict()).default([]),
+    }).strict(),
 });
 
 const news = defineCollection({
@@ -102,9 +114,9 @@ const news = defineCollection({
             z.object({
                 date: z.coerce.date(),
                 text: z.string(),
-            }),
+            }).strict(),
         ),
-    }),
+    }).strict(),
 });
 
 const research = defineCollection({
@@ -113,14 +125,14 @@ const research = defineCollection({
         title: z.string(),
         pubLimit: z.number().int().min(0).default(2),
         areas: z.array(researchAreaSchema).default([]),
-    }),
+    }).strict(),
 });
 
 const researchDetail = defineCollection({
     loader: glob({ pattern: '*/index.md', base: './src/content/research', generateId: keepFilePathId }),
     schema: z.object({
         title: z.string(),
-    }),
+    }).strict(),
 });
 
 const publication = defineCollection({
@@ -128,21 +140,21 @@ const publication = defineCollection({
     schema: z.object({
         title: z.string(),
         publication: z.array(publicationPaperSchema).default([]),
-    }),
+    }).strict(),
 });
 
-const publicationProject = defineCollection({
-    loader: glob({ pattern: '*/index.md', base: './src/content/publication', generateId: keepFilePathId }),
+const project = defineCollection({
+    loader: glob({ pattern: '*/index.md', base: './src/content/project', generateId: keepFilePathId }),
     schema: z.object({
         title: z.string(),
-    }),
+    }).strict(),
 });
 
 const team = defineCollection({
     loader: glob({ pattern: 'index.md', base: './src/content/team', generateId: keepFilePathId }),
     schema: z.object({
         title: z.string(),
-    }),
+    }).strict(),
 });
 
 const teamGroup = defineCollection({
@@ -152,7 +164,7 @@ const teamGroup = defineCollection({
         members: z.record(z.string(), z.array(teamPersonSchema)).optional(),
         alumni: z.array(alumniPersonSchema).optional(),
         columns: tableColumnsSchema.optional(),
-    }),
+    }).strict(),
 });
 
 const teamMember = defineCollection({
@@ -165,10 +177,10 @@ const teamMember = defineCollection({
         photo: z.object({
             src: imageFromAssets(image),
             alt: z.string().default(''),
-        }).optional(),
+        }).strict().optional(),
         homepage: hrefSchema.optional(),
         email: hrefSchema.optional(),
-    }),
+    }).strict(),
 });
 
 const course = defineCollection({
@@ -177,19 +189,19 @@ const course = defineCollection({
         title: z.string(),
         courses: z.array(courseInfoSchema).default([]),
         teaching: z.array(teachingSchema).default([]),
-    }),
+    }).strict(),
 });
 
 const coursePage = defineCollection({
     loader: glob({ pattern: '*/*.md', base: './src/content/course', generateId: keepFilePathId }),
-    schema: z.object({}),
+    schema: z.object({}).strict(),
 });
 
 const join = defineCollection({
     loader: glob({ pattern: 'index.md', base: './src/content/join', generateId: keepFilePathId }),
     schema: z.object({
         title: z.string(),
-    }),
+    }).strict(),
 });
 
 const site = defineCollection({
@@ -201,7 +213,7 @@ const site = defineCollection({
             z.string(),
             z.object({
                 src: z.string(),
-            }),
+            }).strict(),
         ]).nullable().optional(),
         nav: z.array(navItemSchema).default([]),
         footer: z.object({
@@ -211,21 +223,21 @@ const site = defineCollection({
                 addressIcon: z.object({
                     src: z.string(),
                     alt: z.string().default(''),
-                }),
+                }).strict(),
                 emailIcon: z.object({
                     src: z.string(),
                     alt: z.string().default(''),
-                }),
-            }),
+                }).strict(),
+            }).strict(),
             school: z.object({
                 name: z.string(),
                 logo: z.object({
                     src: z.string(),
                     alt: z.string().default(''),
-                }).optional(),
-            }),
-        }),
-    }),
+                }).strict().optional(),
+            }).strict(),
+        }).strict(),
+    }).strict(),
 });
 
 export const collections = {
@@ -234,7 +246,7 @@ export const collections = {
     research,
     researchDetail,
     publication,
-    publicationProject,
+    project,
     team,
     teamGroup,
     teamMember,

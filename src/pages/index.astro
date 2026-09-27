@@ -1,6 +1,6 @@
 ---
 import { getEntry } from 'astro:content';
-import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { createSatteriMarkdownProcessor } from '@astrojs/markdown-satteri';
 import BaseLayout from '@/layout/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -22,7 +22,7 @@ const slides = (home?.data.heroImages ?? []) as HeroSlide[];
 const firstSlideImage = slides[0]?.src;
 const firstSlideUrl = firstSlideImage?.src;
 const collapsedNewsCount = home?.data.newsLimit ?? 6;
-const markdownProcessor = await createMarkdownProcessor();
+const markdownProcessor = await createSatteriMarkdownProcessor();
 const news = await Promise.all(
     (newsEntry?.data.news ?? [])
         .sort((a, b) => b.date.getTime() - a.date.getTime())

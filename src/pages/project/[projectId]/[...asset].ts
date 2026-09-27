@@ -4,9 +4,13 @@ import { assetResponse, contentAssetPaths } from '@/lib/asset-routes';
 
 export async function getStaticPaths() {
     const publicationPage = await getEntry('publication', 'index');
-    const publicationIds = new Set(publicationPage?.data.publication.map((paper) => paper.id) ?? []);
+    const projectIds = new Set(
+        publicationPage?.data.publication
+            .filter((paper) => paper.project)
+            .map((paper) => paper.id) ?? [],
+    );
 
-    return contentAssetPaths('publication', 'slug', publicationIds);
+    return contentAssetPaths('project', 'projectId', projectIds);
 }
 
 export const GET: APIRoute<{ filePath: string }> = async ({ props }) => assetResponse(props.filePath);

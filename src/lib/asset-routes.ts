@@ -41,11 +41,12 @@ export function listFiles(directory: string): string[] {
     });
 }
 
-export function contentAssetPaths(section: string, paramName: string) {
+export function contentAssetPaths(section: string, paramName: string, allowedIds?: ReadonlySet<string>) {
     const sectionRoot = join(process.cwd(), 'src/content', section);
     const ids = readdirSync(sectionRoot, { withFileTypes: true })
         .filter((entry) => entry.isDirectory())
         .map((entry) => entry.name)
+        .filter((id) => !allowedIds || allowedIds.has(id))
         .filter((id) => {
             try {
                 return statSync(contentAssetsRoot(section, id)).isDirectory();

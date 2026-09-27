@@ -130,23 +130,6 @@ function isActive(href: string) {
         <footer class="border-t border-slate-200 bg-white">
             <div class="page-band flex flex-col gap-4 py-3 md:flex-row md:items-center md:justify-between">
                 <section aria-label="Contact" class="space-y-0 text-sm font-medium text-slate-600">
-                    <p class="flex items-start gap-2">
-                        <img class="mt-0.5 h-4 w-4 shrink-0" src={assetPath(site.footer.contact.addressIcon.src)} alt={site.footer.contact.addressIcon.alt} loading="lazy" />
-                        {site.footer.contact.location}
-                    </p>
-                    {
-                        contactEmailHref ? (
-                            <a class="flex items-center gap-2 text-slate-600 no-underline hover:text-lab-blue" href={contactEmailHref}>
-                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
-                                {site.footer.contact.email}
-                            </a>
-                        ) : (
-                            <p class="flex items-center gap-2 text-slate-600">
-                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
-                                {site.footer.contact.email}
-                            </p>
-                        )
-                    }
                     {
                         site.footer.contact.sites && (
                             <p class="flex items-start gap-2 text-slate-600">
@@ -163,6 +146,23 @@ function isActive(href: string) {
                             </p>
                         )
                     }
+                    {
+                        contactEmailHref ? (
+                            <a class="flex items-center gap-2 text-slate-600 no-underline hover:text-lab-blue" href={contactEmailHref}>
+                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
+                                {site.footer.contact.email}
+                            </a>
+                        ) : (
+                            <p class="flex items-center gap-2 text-slate-600">
+                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
+                                {site.footer.contact.email}
+                            </p>
+                        )
+                    }
+                    <p class="flex items-start gap-2">
+                        <img class="mt-0.5 h-4 w-4 shrink-0" src={assetPath(site.footer.contact.addressIcon.src)} alt={site.footer.contact.addressIcon.alt} loading="lazy" />
+                        {site.footer.contact.location}
+                    </p>
                 </section>
 
                 <div class="flex w-fit flex-col items-stretch gap-0.5">

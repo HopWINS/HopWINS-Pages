@@ -1,7 +1,8 @@
 ---
 title: "Intern"
 members:
-    Master Student: []
+    Master Student:
+        - Rongqing Zhang
     Undergrad Student:
         - Oscar Munoz
     Visiting:

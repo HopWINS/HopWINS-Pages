@@ -14,6 +14,8 @@ courses:
       semester: "2026 Spring"
       description: "This course introduces embedded systems and key concepts in the Internet of Things (IoT), with emphasis on wireless communication and localization techniques."
 teaching:
+    - semester: "2026 Fall"
+      id: "adviot"
     - semester: "2026 Spring"
       id: "embwiot"
     - semester: "2025 Fall"

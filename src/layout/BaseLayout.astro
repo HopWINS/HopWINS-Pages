@@ -129,7 +129,7 @@ function isActive(href: string) {
         </main>
         <footer class="border-t border-slate-200 bg-white">
             <div class="page-band flex flex-col gap-4 py-3 md:flex-row md:items-center md:justify-between">
-                <section aria-label="Contact" class="space-y-1.5 text-sm font-medium text-slate-600">
+                <section aria-label="Contact" class="space-y-0 text-sm font-medium text-slate-600">
                     <p class="flex items-start gap-2">
                         <img class="mt-0.5 h-4 w-4 shrink-0" src={assetPath(site.footer.contact.addressIcon.src)} alt={site.footer.contact.addressIcon.alt} loading="lazy" />
                         {site.footer.contact.location}
@@ -144,6 +144,22 @@ function isActive(href: string) {
                             <p class="flex items-center gap-2 text-slate-600">
                                 <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.emailIcon.src)} alt={site.footer.contact.emailIcon.alt} loading="lazy" />
                                 {site.footer.contact.email}
+                            </p>
+                        )
+                    }
+                    {
+                        site.footer.contact.sites && (
+                            <p class="flex items-center gap-2 text-slate-600">
+                                <img class="h-4 w-4 shrink-0" src={assetPath(site.footer.contact.sites.icon.src)} alt={site.footer.contact.sites.icon.alt} loading="lazy" />
+                                <span>
+                                    <span class="sr-only">Lab sites: </span>
+                                    {site.footer.contact.sites.links.map((link, index) => (
+                                        <>
+                                            {index > 0 && <span class="mx-0 text-slate-400" aria-hidden="true">·</span>}
+                                            <a class="text-slate-600 no-underline transition hover:text-lab-blue" href={link.href}>{link.label}</a>
+                                        </>
+                                    ))}
+                                </span>
                             </p>
                         )
                     }

@@ -25,6 +25,17 @@ footer:
         emailIcon:
             src: "lab_email.svg"
             alt: ""
+        sites:
+            icon:
+                src: "lab_site.svg"
+                alt: ""
+            links:
+                - label: "Home"
+                  href: "https://hopwinslab.com"
+                - label: "Wiki"
+                  href: "https://wiki.hopwinslab.com"
+                - label: "Portal"
+                  href: "https://portal.hopwinslab.com"
     school:
         name: "Department of\nComputer Science"
         logo:

@@ -228,6 +228,16 @@ const site = defineCollection({
                     src: z.string(),
                     alt: z.string().default(''),
                 }).strict(),
+                sites: z.object({
+                    icon: z.object({
+                        src: z.string(),
+                        alt: z.string().default(''),
+                    }).strict(),
+                    links: z.array(z.object({
+                        label: z.string(),
+                        href: hrefSchema,
+                    }).strict()).min(1),
+                }).strict().optional(),
             }).strict(),
             school: z.object({
                 name: z.string(),

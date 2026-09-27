@@ -179,6 +179,15 @@ footer:
         emailIcon:
             src: "email-icon.svg"
             alt: ""
+        sites:
+            icon:
+                src: "site-icon.svg"
+                alt: ""
+            links:
+                - label: "Wiki"
+                  href: "https://wiki.example-lab.edu"
+                - label: "Portal"
+                  href: "https://portal.example-lab.edu"
     school:
         name: "Department Name\nSchool Name"
         logo:

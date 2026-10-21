@@ -1,6 +1,8 @@
 ---
 title: "News"
 news:
+    - date: 2026-10
+      text: "Jiacan presented RF-HOI paper at UbiComp ’26."
     - date: 2026-07
       text: "RF-HOI paper accepted by IMWUT. Congratulations Lihao!"
     - date: 2026-05

@@ -36,7 +36,7 @@ alumni:
       position: "Wireless System Engineer @ Apple"
     - name: "Ziran Gao"
       role: "Visiting Student"
-      period: "2024"
+      period: "2024/03 - 2024/08"
     - name: "Shengding Liu"
       role: "Visiting Student"
       period: "2024/03 - 2024/08"

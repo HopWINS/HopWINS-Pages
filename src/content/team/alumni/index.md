@@ -25,6 +25,7 @@ alumni:
     - name: "Ning An"
       role: "Visiting Student"
       period: "2025/06 - 2025/09"
+      position: "PhD Student @ UCSD"
     - name: "Yanyu Lin"
       role: "Master Student"
       period: "2025/03 - 2025/05"
